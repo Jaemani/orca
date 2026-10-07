@@ -1,4 +1,5 @@
-import React from 'react'
+import React, { useState } from 'react'
+import { WrapText } from 'lucide-react'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/utils'
 import { getCodeFenceLanguageLabel } from './code-fence-language-label'
@@ -16,6 +17,17 @@ export function NativeChatCodeBlock({
   plain?: boolean
 }): React.JSX.Element {
   const code = extractCodeText(children)
+  // Per block and not persisted: long lines scroll sideways until the reader asks to wrap.
+  const [wrapped, setWrapped] = useState(false)
+  const actions = code ? (
+    <>
+      <NativeChatCodeWrapButton wrapped={wrapped} onToggle={() => setWrapped((value) => !value)} />
+      <NativeChatCopyButton
+        text={code}
+        label={translate('components.native-chat.copyCode', 'Copy code')}
+      />
+    </>
+  ) : null
 
   return (
     <div className="group/code relative my-3 min-w-0 max-w-full overflow-hidden rounded-lg border border-chat-code-border bg-chat-code-surface">
@@ -27,20 +39,15 @@ export function NativeChatCodeBlock({
           >
             <span className="truncate">{getCodeFenceLanguageLabel(language)}</span>
           </span>
-          {code ? (
-            <NativeChatCopyButton
-              text={code}
-              label={translate('components.native-chat.copyCode', 'Copy code')}
-              className="-mr-1"
-            />
-          ) : null}
+          {code ? <div className="-mr-1 flex items-center gap-0.5">{actions}</div> : null}
         </div>
       ) : null}
       <pre
         data-native-chat-code-content
         className={cn(
-          'scrollbar-sleek m-0 max-w-full overflow-x-auto font-mono text-chat-code text-chat-code-foreground',
-          language ? 'px-3.5 pt-0.5 pb-3' : 'p-3 pr-10'
+          'scrollbar-sleek m-0 max-w-full font-mono text-chat-code text-chat-code-foreground',
+          wrapped ? 'whitespace-pre-wrap [overflow-wrap:anywhere]' : 'overflow-x-auto',
+          language ? 'px-3.5 pt-0.5 pb-3' : 'p-3 pr-16'
         )}
       >
         {language && code && !plain ? (
@@ -52,13 +59,36 @@ export function NativeChatCodeBlock({
         )}
       </pre>
       {code && !language ? (
-        <NativeChatCopyButton
-          text={code}
-          label={translate('components.native-chat.copyCode', 'Copy code')}
-          className="absolute right-2 top-2 opacity-100 transition-opacity can-hover:pointer-events-none can-hover:opacity-0 group-hover/code:pointer-events-auto group-hover/code:opacity-100 [[class~='group/code']:has(:focus-visible)_&]:pointer-events-auto [[class~='group/code']:has(:focus-visible)_&]:opacity-100"
-        />
+        <div className="absolute right-2 top-2 flex items-center gap-0.5 opacity-100 transition-opacity can-hover:pointer-events-none can-hover:opacity-0 group-hover/code:pointer-events-auto group-hover/code:opacity-100 [[class~='group/code']:has(:focus-visible)_&]:pointer-events-auto [[class~='group/code']:has(:focus-visible)_&]:opacity-100">
+          {actions}
+        </div>
       ) : null}
     </div>
+  )
+}
+
+/** Looks like the Copy button beside it; pressed keeps the hover fill. */
+function NativeChatCodeWrapButton({
+  wrapped,
+  onToggle
+}: {
+  wrapped: boolean
+  onToggle: () => void
+}): React.JSX.Element {
+  const label = wrapped
+    ? translate('components.native-chat.disableLineWrap', 'Disable line wrap')
+    : translate('components.native-chat.wrapLines', 'Wrap lines')
+  return (
+    <button
+      type="button"
+      onClick={onToggle}
+      aria-label={label}
+      aria-pressed={wrapped}
+      title={label}
+      className="flex size-6 shrink-0 items-center justify-center rounded-md text-chat-foreground-faint transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring aria-pressed:bg-accent aria-pressed:text-accent-foreground"
+    >
+      <WrapText className="size-3.5" />
+    </button>
   )
 }
 
