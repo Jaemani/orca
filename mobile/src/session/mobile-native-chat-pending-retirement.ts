@@ -1,3 +1,4 @@
+import { agentJournalSubmissionKey } from '../../../src/shared/agent-session-journal-item-key'
 import type { NativeChatMessage } from '../../../src/shared/native-chat-types'
 import {
   countImageSourceTurnsAfter,
@@ -52,7 +53,9 @@ export function selectGluedPendingIds(
     // unbound it stays a barrier: retiring it early would drop the phone-local photo,
     // which the transcript's host path cannot render.
     const unboundImage = Boolean(item.images?.length) && !reboundImagePendingIds.has(item.id)
+    // A structured send is never glued onto another; it settles by its id alone.
     return excludedPendingIds.has(item.id) ||
+      item.clientMessageId !== undefined ||
       !item.baselineResolved ||
       unboundImage ||
       text === '' ||
@@ -144,7 +147,8 @@ function matchGluedRun(
 export function retireLandedMobileNativeChatPending(
   messages: readonly NativeChatMessage[],
   current: MobileNativeChatPendingMessage[],
-  landedImagePendingIds: ReadonlySet<string>
+  landedImagePendingIds: ReadonlySet<string>,
+  recordedSendIds: ReadonlySet<string> = NO_PENDING_IDS
 ): MobileNativeChatPendingMessage[] {
   const landedCounts = new Map<string, number>()
   for (const message of messages) {
@@ -161,6 +165,18 @@ export function retireLandedMobileNativeChatPending(
   for (const item of current) {
     if (landedImagePendingIds.has(item.id)) {
       landedPendingIds.add(item.id)
+      continue
+    }
+    // Recorded under its own id: the host's row holds it from here, whatever rows share its text.
+    // A photo whose row is drawn waits for its local preview to bind to that row.
+    if (item.clientMessageId !== undefined) {
+      const rowId = agentJournalSubmissionKey(item.clientMessageId)
+      if (
+        recordedSendIds.has(item.clientMessageId) &&
+        !(item.images?.length && messages.some((message) => message.id === rowId))
+      ) {
+        landedPendingIds.add(item.id)
+      }
       continue
     }
     // Keep image echoes until their local preview reaches the authoritative message.

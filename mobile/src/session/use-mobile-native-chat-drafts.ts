@@ -2,11 +2,13 @@ import {
   useCallback,
   useEffect,
   useLayoutEffect,
+  useMemo,
   useRef,
   useState,
   type Dispatch,
   type SetStateAction
 } from 'react'
+import type { AgentJournalSubmission } from '../../../src/shared/agent-session-journal-types'
 import type { NativeChatMessage } from '../../../src/shared/native-chat-types'
 import { appendReturnedDraftText } from '../../../src/shared/returned-draft-text'
 import {
@@ -23,6 +25,7 @@ import {
   appendMobileNativeChatPending,
   combineMobileNativeChatPending,
   mergeWaitingSessionPending,
+  mobileRecordedSendIds,
   removeWaitingSessionPending,
   type MobileNativeChatPendingMessage,
   type MobileNativeChatSendOrigin
@@ -41,6 +44,7 @@ import {
 export type { MobileNativeChatPendingMessage, MobileNativeChatSendOrigin }
 
 const NO_PENDING_MESSAGES: MobileNativeChatPendingMessage[] = []
+const NO_SUBMISSIONS: readonly AgentJournalSubmission[] = []
 const NO_IMAGE_PREVIEWS: Record<string, string[]> = {}
 
 export function useMobileNativeChatDrafts(args: {
@@ -65,6 +69,8 @@ export function useMobileNativeChatDrafts(args: {
   transcriptSettled: boolean
   /** The active pane's host-held queued-draft cards (structured lane only). */
   queuedCards?: readonly { messageId: string; text: string }[]
+  /** The host's record of each structured send, which settles a send by its own id. */
+  submissions?: readonly AgentJournalSubmission[]
 }): {
   composerText: string
   setComposerText: Dispatch<SetStateAction<string>>
@@ -86,11 +92,17 @@ export function useMobileNativeChatDrafts(args: {
   clearDraftForSend: (origin: MobileNativeChatSendOrigin, text: string) => void
   /** Put the text back after a definite rejection, after whatever the composer holds now. */
   restoreRejectedDraft: (origin: MobileNativeChatSendOrigin, text: string) => void
-  acceptSend: (origin: MobileNativeChatSendOrigin, text: string, images?: string[]) => void
+  acceptSend: (
+    origin: MobileNativeChatSendOrigin,
+    text: string,
+    images?: string[],
+    clientMessageId?: string
+  ) => void
   holdUnconfirmedSend: (
     origin: MobileNativeChatSendOrigin,
     text: string,
-    onUnconfirmed: () => void
+    onUnconfirmed: () => void,
+    clientMessageId?: string
   ) => void
 } {
   const {
@@ -104,7 +116,8 @@ export function useMobileNativeChatDrafts(args: {
     chatActive = true,
     transcriptLoading,
     transcriptSettled,
-    queuedCards
+    queuedCards,
+    submissions = NO_SUBMISSIONS
   } = args
   const draftKey = mobileNativeChatScopeKey(hostId, worktreeId, tabId)
   const pendingKey = draftKey && sessionId ? `${draftKey}\0${sessionId}` : null
@@ -118,6 +131,7 @@ export function useMobileNativeChatDrafts(args: {
   const [imagePreviewsBySession, setImagePreviewsBySession] = useState<
     Record<string, Record<string, string[]>>
   >({})
+  const recordedSendIds = useMemo(() => mobileRecordedSendIds(submissions), [submissions])
   const pendingCounterRef = useRef(0)
   const composerEditGenerationRef = useRef(0)
   const getComposerEditGeneration = useCallback(() => composerEditGenerationRef.current, [])
@@ -204,21 +218,24 @@ export function useMobileNativeChatDrafts(args: {
   }, [])
 
   const acceptSend = useCallback(
-    (origin: MobileNativeChatSendOrigin, text: string, images?: string[]) => {
+    (
+      origin: MobileNativeChatSendOrigin,
+      text: string,
+      images?: string[],
+      clientMessageId?: string
+    ) => {
       if (!origin.pendingKey && !images?.length) {
         return
       }
       pendingCounterRef.current += 1
       const id = `pending-${pendingCounterRef.current}`
-      const key = origin.pendingKey
-      if (key) {
-        setPendingBySession((previous) =>
-          appendMobileNativeChatPending(previous, key, id, origin, text, images)
-        )
+      const key = origin.pendingKey ?? origin.draftKey
+      const append = (previous: Record<string, MobileNativeChatPendingMessage[]>) =>
+        appendMobileNativeChatPending(previous, key, id, origin, text, images, clientMessageId)
+      if (origin.pendingKey) {
+        setPendingBySession(append)
       } else {
-        setPendingWaitingForSession((previous) =>
-          appendMobileNativeChatPending(previous, origin.draftKey, id, origin, text, images)
-        )
+        setPendingWaitingForSession(append)
       }
     },
     []
@@ -228,6 +245,7 @@ export function useMobileNativeChatDrafts(args: {
     draftKey,
     pendingKey,
     messages,
+    recordedSendIds,
     ...(queuedCards ? { queuedCards } : {})
   })
 
@@ -282,7 +300,12 @@ export function useMobileNativeChatDrafts(args: {
       const rebased = transcriptSettled
         ? rebaseMobileNativeChatPendingBaselines(messages, current)
         : current
-      const next = retireLandedMobileNativeChatPending(messages, rebased, landedImagePendingIds)
+      const next = retireLandedMobileNativeChatPending(
+        messages,
+        rebased,
+        landedImagePendingIds,
+        recordedSendIds
+      )
       if (next === current) {
         return previous
       }
@@ -293,7 +316,7 @@ export function useMobileNativeChatDrafts(args: {
       delete remaining[pendingKey]
       return remaining
     })
-  }, [messages, pending, pendingKey, transcriptSettled])
+  }, [messages, pending, pendingKey, recordedSendIds, transcriptSettled])
 
   return {
     composerText,

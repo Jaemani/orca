@@ -91,6 +91,7 @@ vi.mock('./use-mobile-structured-agent-session', () => ({
     session: structuredSessionState,
     ...structuredActivity,
     queued: { cards: [], send: vi.fn(), delete: vi.fn(), edit: vi.fn() },
+    turnJournal: { items: [], submissions: [] },
     sendWithOutcome: structuredSendWithOutcome,
     acceptsImages: false,
     cancel: structuredCancel,
@@ -348,7 +349,7 @@ describe('useMobileNativeChatController handleNativeChatSend', () => {
     })
 
     expect(accepted).toBe(true)
-    expect(structuredSendWithOutcome).toHaveBeenCalledWith('look')
+    expect(structuredSendWithOutcome.mock.calls[0]?.[0]).toBe('look')
     expect(sendWithOutcome).not.toHaveBeenCalled()
     expect(clientStub.sendRequest).not.toHaveBeenCalled()
   })
@@ -360,8 +361,9 @@ describe('useMobileNativeChatController handleNativeChatSend', () => {
     await act(async () => {
       await controller!.handleNativeChatSend('/review')
     })
-    expect(structuredSendWithOutcome).toHaveBeenCalledWith('/review')
-    expect(acceptSend).toHaveBeenCalledWith(ORIGIN, '/review', undefined)
+    const [text, , , , clientMessageId] = structuredSendWithOutcome.mock.calls[0] ?? []
+    expect(text).toBe('/review')
+    expect(acceptSend).toHaveBeenCalledWith(ORIGIN, '/review', undefined, clientMessageId)
     // Its options report decides attach, not the built-in answer.
     expect(controller!.nativeChatAcceptsImages).toBe(false)
   })

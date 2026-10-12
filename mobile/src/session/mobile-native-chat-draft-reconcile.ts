@@ -1,3 +1,4 @@
+import { agentJournalSubmissionKey } from '../../../src/shared/agent-session-journal-item-key'
 import { isImageRefBlock, type NativeChatMessage } from '../../../src/shared/native-chat-types'
 import {
   hasImagePromptMarker,
@@ -18,6 +19,8 @@ export type UnconfirmedSend = {
   baselineTailMessageId: string | null
   /** Queued-draft cards on screen at send time; see `findQueuedUnconfirmedSends`. */
   baselineQueuedMessageIds?: readonly string[]
+  /** A structured send's own id, which settles it instead of its text. */
+  clientMessageId?: string
   deadline: ReturnType<typeof setTimeout> | null
 }
 
@@ -63,6 +66,7 @@ export type PendingImagePreviewEcho = {
   images?: string[]
   expectedOccurrence: number
   baselineTailMessageId: string | null
+  clientMessageId?: string
 }
 
 export type LandedImagePreviewEcho = {
@@ -176,6 +180,14 @@ export function findLandedImagePreviewEchoes(
     if (!entry.images?.length) {
       continue
     }
+    // The host draws a structured send under its own id, whatever its text.
+    if (entry.clientMessageId !== undefined) {
+      const rowId = agentJournalSubmissionKey(entry.clientMessageId)
+      if (messages.some((message) => message.id === rowId)) {
+        landed.push({ pendingId: entry.id, messageId: rowId, images: entry.images })
+      }
+      continue
+    }
     const targetText = normalizeNativeChatUserText(entry.text)
     const candidates = normalized.filter((message) => {
       if (message.role !== 'user') {
@@ -234,11 +246,12 @@ export function findQueuedUnconfirmedSends(
   const claimed = new Set<string>()
   const held: UnconfirmedSend[] = []
   for (const entry of entries) {
-    const card = cards.find(
-      (candidate) =>
-        !claimed.has(candidate.messageId) &&
-        !(entry.baselineQueuedMessageIds ?? []).includes(candidate.messageId) &&
-        normalizeNativeChatUserText(candidate.text) === entry.normalizedText
+    const card = cards.find((candidate) =>
+      entry.clientMessageId !== undefined
+        ? candidate.messageId === entry.clientMessageId
+        : !claimed.has(candidate.messageId) &&
+          !(entry.baselineQueuedMessageIds ?? []).includes(candidate.messageId) &&
+          normalizeNativeChatUserText(candidate.text) === entry.normalizedText
     )
     if (card) {
       claimed.add(card.messageId)
@@ -250,7 +263,8 @@ export function findQueuedUnconfirmedSends(
 
 export function findLandedUnconfirmedSends(
   messages: readonly NativeChatMessage[],
-  entries: readonly UnconfirmedSend[]
+  entries: readonly UnconfirmedSend[],
+  recordedSendIds: ReadonlySet<string> = new Set()
 ): UnconfirmedSend[] {
   // Why: pagination prepends old equal text; only unclaimed matches after each
   // captured tail prove new echoes. User turns are keyed by text; an image echo
@@ -272,6 +286,12 @@ export function findLandedUnconfirmedSends(
   const claimedMessageIds = new Set<string>()
   const landed: UnconfirmedSend[] = []
   for (const entry of entries) {
+    if (entry.clientMessageId !== undefined) {
+      if (recordedSendIds.has(entry.clientMessageId)) {
+        landed.push(entry)
+      }
+      continue
+    }
     const tailIndex = entry.baselineTailMessageId
       ? messageIndexById.get(entry.baselineTailMessageId)
       : -1

@@ -90,7 +90,7 @@ const structured = {
   turnIndicator: null,
   workingStartedAt: null,
   settledTurns: null,
-  turnJournal: null,
+  turnJournal: { items: [], submissions: [] },
   permission: null,
   question: null,
   queued: { cards: [] },

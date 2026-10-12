@@ -1,3 +1,5 @@
+import type { AgentJournalSubmission } from '../../../src/shared/agent-session-journal-types'
+import { handedOffQueuedMessageIds } from '../../../src/shared/structured-agent-session-draft-hand-off'
 import { normalizeReconcileText } from './mobile-native-chat-draft-reconcile'
 
 export type MobileNativeChatPendingMessage = {
@@ -12,6 +14,8 @@ export type MobileNativeChatPendingMessage = {
    *  and rebased onto the first authoritative read instead of reconciling
    *  against rows that may belong to another tab. */
   baselineResolved: boolean
+  /** A structured send's own id: it settles when the host records it, never by text. */
+  clientMessageId?: string
 }
 
 export type MobileNativeChatSendOrigin = {
@@ -40,13 +44,24 @@ export function combineMobileNativeChatPending(
   return [...session, ...waiting.filter((item) => !sessionIds.has(item.id))]
 }
 
+/** Every send id the host recorded, directly or as a queued draft it later handed off. */
+export function mobileRecordedSendIds(
+  submissions: readonly AgentJournalSubmission[]
+): ReadonlySet<string> {
+  return new Set([
+    ...submissions.map((submission) => submission.clientMessageId),
+    ...handedOffQueuedMessageIds(submissions)
+  ])
+}
+
 export function appendMobileNativeChatPending(
   previous: PendingByKey,
   key: string,
   id: string,
   origin: MobileNativeChatSendOrigin,
   text: string,
-  images?: string[]
+  images?: string[],
+  clientMessageId?: string
 ): PendingByKey {
   const current = previous[key] ?? []
   // Count outstanding repeats with the same normalized key.
@@ -73,7 +88,8 @@ export function appendMobileNativeChatPending(
             : origin.baselineOccurrences + earlierOutstanding + 1,
         baselineTailMessageId: origin.baselineTailMessageId,
         baselineResolved: origin.baselineResolved,
-        ...(images?.length ? { images } : {})
+        ...(images?.length ? { images } : {}),
+        ...(clientMessageId ? { clientMessageId } : {})
       }
     ]
   }

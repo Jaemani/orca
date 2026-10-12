@@ -1,6 +1,7 @@
 import { useCallback } from 'react'
 import type { StructuredAgentId } from '../../../src/shared/agent-session-provider-handle'
 import { isStructuredAgentSessionComposerCommand } from '../../../src/shared/structured-agent-session-composer'
+import { structuredSessionOperationId } from './structured-session-operation-id'
 import type { MobileNativeChatSendOutcome } from './mobile-native-chat-send'
 import type { MobileNativeChatSendOrigin } from './use-mobile-native-chat-drafts'
 
@@ -16,15 +17,22 @@ export function useMobileStructuredNativeChatSendBridge(args: {
     text: string,
     images?: string[],
     deadline?: number,
-    attachments?: readonly StructuredNativeChatAttachment[]
+    attachments?: readonly StructuredNativeChatAttachment[],
+    clientMessageId?: string
   ) => Promise<MobileNativeChatSendOutcome>
   captureSendOrigin: (text: string) => MobileNativeChatSendOrigin | null
   clearDraftForSend: (origin: MobileNativeChatSendOrigin, text: string) => void
-  acceptSend: (origin: MobileNativeChatSendOrigin, text: string, images?: string[]) => void
+  acceptSend: (
+    origin: MobileNativeChatSendOrigin,
+    text: string,
+    images?: string[],
+    clientMessageId?: string
+  ) => void
   holdUnconfirmedSend: (
     origin: MobileNativeChatSendOrigin,
     text: string,
-    onUnconfirmed: () => void
+    onUnconfirmed: () => void,
+    clientMessageId?: string
   ) => void
   restoreRejectedDraft: (origin: MobileNativeChatSendOrigin, text: string) => void
   onSendError: (message: string) => void
@@ -61,17 +69,12 @@ export function useMobileStructuredNativeChatSendBridge(args: {
       }
       const isHostCommand = isStructuredAgentSessionComposerCommand(text, agent)
       clearDraftForSend(origin, text)
-      const outcome =
-        attachments !== undefined
-          ? await sendStructured(text, images, deadline, attachments)
-          : deadline !== undefined
-            ? await sendStructured(text, images, deadline)
-            : images !== undefined
-              ? await sendStructured(text, images)
-              : await sendStructured(text)
+      // The host records the send under this id, so its bubble and hold settle by it, not by text.
+      const clientMessageId = structuredSessionOperationId()
+      const outcome = await sendStructured(text, images, deadline, attachments, clientMessageId)
       if (outcome === 'accepted') {
         if (!isHostCommand) {
-          acceptSend(origin, text.trimEnd(), images)
+          acceptSend(origin, text.trimEnd(), images, clientMessageId)
         }
         return 'accepted'
       }
@@ -85,8 +88,11 @@ export function useMobileStructuredNativeChatSendBridge(args: {
           restoreRejectedDraft(origin, text)
           return 'unknown'
         }
-        holdUnconfirmedSend(origin, text.trimEnd(), () =>
-          onSendError('Delivery unconfirmed — check chat before retrying')
+        holdUnconfirmedSend(
+          origin,
+          text.trimEnd(),
+          () => onSendError('Delivery unconfirmed — check chat before retrying'),
+          clientMessageId
         )
         return 'unknown'
       }

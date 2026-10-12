@@ -62,8 +62,26 @@ describe('useMobileStructuredNativeChatSendBridge', () => {
 
     await expect(sendWithOutcome('/init')).resolves.toBe('accepted')
 
-    expect(acceptSend).toHaveBeenCalledWith(ORIGIN, '/init', undefined)
+    expect(acceptSend).toHaveBeenCalledWith(ORIGIN, '/init', undefined, expect.any(String))
     expect(restoreRejectedDraft).not.toHaveBeenCalled()
+  })
+
+  // The host records the send under the id it was sent with, so its bubble settles by that id.
+  it('sends, echoes and holds under one id it makes for each send', async () => {
+    sendStructured.mockResolvedValue('accepted')
+    mount('claude')
+
+    await sendWithOutcome('hello')
+    await sendWithOutcome('hello')
+
+    const ids = sendStructured.mock.calls.map((call) => call[4])
+    expect(sendStructured.mock.calls[0]).toEqual(['hello', undefined, undefined, undefined, ids[0]])
+    expect(acceptSend.mock.calls.map((call) => call[3])).toEqual(ids)
+    expect(new Set(ids).size).toBe(2)
+
+    sendStructured.mockResolvedValue('unknown')
+    await sendWithOutcome('again')
+    expect(holdUnconfirmedSend.mock.calls[0]?.[3]).toBe(sendStructured.mock.calls[2]?.[4])
   })
 
   it('holds unknown delivery for commands owned by the active agent', async () => {
@@ -72,7 +90,12 @@ describe('useMobileStructuredNativeChatSendBridge', () => {
 
     await expect(sendWithOutcome('/review')).resolves.toBe('unknown')
 
-    expect(holdUnconfirmedSend).toHaveBeenCalledWith(ORIGIN, '/review', expect.any(Function))
+    expect(holdUnconfirmedSend).toHaveBeenCalledWith(
+      ORIGIN,
+      '/review',
+      expect.any(Function),
+      expect.any(String)
+    )
     expect(restoreRejectedDraft).not.toHaveBeenCalled()
   })
 
@@ -105,7 +128,12 @@ describe('useMobileStructuredNativeChatSendBridge', () => {
 
     await expect(sendWithOutcome('/review')).resolves.toBe('unknown')
 
-    expect(holdUnconfirmedSend).toHaveBeenCalledWith(ORIGIN, '/review', expect.any(Function))
+    expect(holdUnconfirmedSend).toHaveBeenCalledWith(
+      ORIGIN,
+      '/review',
+      expect.any(Function),
+      expect.any(String)
+    )
     expect(restoreRejectedDraft).not.toHaveBeenCalled()
   })
 })

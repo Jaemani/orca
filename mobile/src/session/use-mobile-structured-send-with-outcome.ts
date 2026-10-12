@@ -55,7 +55,8 @@ export function useMobileStructuredSendWithOutcome(args: {
   text: string,
   images?: string[],
   deadline?: number,
-  attachments?: readonly StructuredMobileSendAttachment[]
+  attachments?: readonly StructuredMobileSendAttachment[],
+  clientMessageId?: string
 ) => Promise<MobileNativeChatSendOutcome> {
   const {
     agent,
@@ -74,7 +75,8 @@ export function useMobileStructuredSendWithOutcome(args: {
       text: string,
       images?: string[],
       deadline?: number,
-      attachments?: readonly StructuredMobileSendAttachment[]
+      attachments?: readonly StructuredMobileSendAttachment[],
+      clientMessageId?: string
     ): Promise<MobileNativeChatSendOutcome> => {
       const currentFence = stateRef.current.fence
       if (!client || !sessionId || !enabled || currentFence === null) {
@@ -132,6 +134,7 @@ export function useMobileStructuredSendWithOutcome(args: {
           ? { delivery: 'queue-if-active' as const }
           : {}),
         deadline,
+        ...(clientMessageId ? { clientMessageId } : {}),
         onError: onSendError
       })
     },
