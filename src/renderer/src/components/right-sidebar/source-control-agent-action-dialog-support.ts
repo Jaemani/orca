@@ -92,7 +92,7 @@ export function buildSourceControlAgentStatusCopy(args: {
   if (connectionUnavailable) {
     return 'Unable to resolve the workspace connection.'
   }
-  if (!hasEnabledAgents && !detecting) {
+  if (!selectedAgent && !hasEnabledAgents && !detecting) {
     return 'No enabled agents were detected on this workspace host.'
   }
   return null

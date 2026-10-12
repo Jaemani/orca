@@ -103,8 +103,7 @@ async function installGuestHooksAndPlugins(
     if (state.mux !== mux || mux.isDisposed()) {
       return
     }
-    const currentSettings = deps.managedHookSettings()
-    const settings = currentSettings && { ...currentSettings }
+    const settings = deps.managedHookSettings()
     const settingsKey = openCodePluginSettingsKey(settings)
     state.lastAttemptOpenCodeSettings = settingsKey
     const overlay = await requestGuestOpenCodeOverlayDir(
