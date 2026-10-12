@@ -17,7 +17,6 @@ import { mergePersistedWindowsPath } from '../../../pty/windows-environment-path
 import { resolveCodexShellLaunchPreflightCommand } from '../../../pty/codex-shell-launch-preflight'
 import { scheduleCodexHookReconcile } from '../../../codex/codex-hook-reconcile'
 import { buildConfiguredProxyEnv } from '../../../../shared/network-proxy'
-import { isTuiAgentEnabled } from '../../../../shared/tui-agent-selection'
 import type { BuildPtyHostEnvOptions } from './types'
 import { stripInheritedOrcaCodexHomeOverride } from './codex-home'
 import {
@@ -68,12 +67,9 @@ export function buildPtyHostEnv(
   })
 
   const shouldPrepareOmpShadow = piAgentKind === 'omp' || !hasLaunchCommand
-  const shouldInstallPiExtensions =
-    opts.agentStatusHooksEnabled && isTuiAgentEnabled('pi', opts.disabledTuiAgents)
-  const shouldInstallOmpExtensions =
-    opts.agentStatusHooksEnabled && isTuiAgentEnabled('omp', opts.disabledTuiAgents)
-  const shouldInstallPrimeAgentExtensions =
-    opts.agentStatusHooksEnabled && isTuiAgentEnabled('prime-agent', opts.disabledTuiAgents)
+  const shouldInstallPiExtensions = opts.agentStatusHooksEnabled
+  const shouldInstallOmpExtensions = opts.agentStatusHooksEnabled
+  const shouldInstallPrimeAgentExtensions = opts.agentStatusHooksEnabled
   // Why: source shadows are agent-scoped; trusting the other kind's source reintroduces Pi/OMP extension-state shadowing.
   const preexistingPiAgentDir = resolvePiAgentSourceDir(baseEnv, 'pi')
   const preexistingOmpAgentDir =
@@ -239,8 +235,7 @@ export function buildPtyHostEnv(
     // Why: user startup files may re-export CODEX_HOME; shell-ready wrappers restore this runtime home before Codex launches.
     baseEnv.ORCA_CODEX_HOME = opts.selectedCodexHomePath
     const preflightCommand = resolveCodexShellLaunchPreflightCommand({
-      hooksEnabled:
-        opts.agentStatusHooksEnabled && isTuiAgentEnabled('codex', opts.disabledTuiAgents),
+      hooksEnabled: opts.agentStatusHooksEnabled,
       isPackaged: opts.isPackaged,
       isWsl: opts.isWsl,
       managedHomePath: opts.selectedCodexHomePath,

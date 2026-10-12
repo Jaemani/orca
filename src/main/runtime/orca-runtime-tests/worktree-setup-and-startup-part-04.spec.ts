@@ -162,7 +162,7 @@ describe('OrcaRuntimeService', () => {
     }
   })
 
-  it('records the resolved fallback agent when the requested startup draft agent is disabled', async () => {
+  it('records the detected agent when the default startup draft agent is hidden', async () => {
     detectInstalledAgentsWithShellPathHydrationMock.mockResolvedValue(['claude'])
     const metaById: Record<string, WorktreeMeta> = {}
     const runtimeStore = {
@@ -220,7 +220,6 @@ describe('OrcaRuntimeService', () => {
       repoSelector: TEST_REPO_ID,
       name: 'runtime-fallback-draft',
       startupDraft: 'https://github.com/stablyai/orca/issues/456',
-      createdWithAgent: 'codex',
       activate: true
     })
 

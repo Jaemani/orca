@@ -2,7 +2,7 @@ import type { CodexHomeLaunchContext } from '../ipc/pty'
 import type { CodexAccountSelectionTarget } from '../codex-accounts/runtime-selection'
 import { codexHookService } from '../codex/hook-service'
 import { getDefaultWslDistro } from '../wsl'
-import { isAgentStatusHooksEnabledForAgent } from '../agent-hooks/managed-agent-hook-controls'
+import { isAgentStatusHooksEnabled } from '../agent-hooks/managed-agent-hook-controls'
 import { reconcileCodexHooksForLaunch } from '../codex/codex-hook-reconcile'
 import { mainProcessState as state } from './main-process-state'
 
@@ -34,8 +34,7 @@ export async function prepareCodexRuntimeHomeForLaunch(
     target?.runtime === 'wsl'
       ? { runtime: 'wsl' as const, wslDistro: target.wslDistro?.trim() || getDefaultWslDistro() }
       : target
-  const isHooksEnabled = (): boolean =>
-    isAgentStatusHooksEnabledForAgent(state.store?.getSettings(), 'codex')
+  const isHooksEnabled = (): boolean => isAgentStatusHooksEnabled(state.store?.getSettings())
   const hooksEnabled = isHooksEnabled()
   try {
     // Why: honor the persisted off switch so post-startup launches can't reinstall removed hooks.

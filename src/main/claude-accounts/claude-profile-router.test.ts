@@ -75,8 +75,7 @@ function fixture(env: NodeJS.ProcessEnv = {}) {
     activeClaudeManagedAccountId: 'a',
     activeClaudeManagedAccountIdsByRuntime: undefined,
     // Hooks off: setup must not probe a real Claude here.
-    agentStatusHooksEnabled: false,
-    disabledTuiAgents: []
+    agentStatusHooksEnabled: false
   }
   // Stands in for the worker; like it, stays pending until settled and marks the folder last.
   const setup: { calls: number; outcome: ClaudeProfileSetupReport['outcome']; settle: () => void } =

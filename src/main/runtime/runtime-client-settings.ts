@@ -8,7 +8,6 @@ import {
   MAX_QUICK_COMMANDS,
   type TerminalQuickCommandMutation
 } from '../../shared/terminal-quick-commands'
-import { haveSameDisabledTuiAgents } from '../../shared/tui-agent-selection'
 import { normalizeSourceControlAiSettings } from '../../shared/source-control-ai'
 import {
   SOURCE_CONTROL_LAUNCH_ACTION_IDS,
@@ -22,7 +21,7 @@ import type { ExecutionHostId } from '../../shared/execution-host'
 import type { TerminalQuickCommand } from '../../shared/terminal-quick-command-types'
 import { recordManagedHookInstallFailure } from '../agent-hooks/install-telemetry'
 import { applyAgentStatusHooksEnabled } from '../agent-hooks/managed-agent-hook-controls'
-import { isAgentStatusHooksEnabledForAgent } from '../../shared/agent-status-hooks-setting'
+import { isAgentStatusHooksEnabled } from '../../shared/agent-status-hooks-setting'
 import type { RuntimeStore } from './runtime-store-contract'
 
 export type RuntimeClientSettings = Pick<
@@ -155,18 +154,14 @@ export class RuntimeClientSettingsController {
     if (!this.store?.getSettings || !this.store.updateSettings) {
       throw new Error('runtime_unavailable')
     }
-    const beforeSettings = this.store.getSettings()
-    const before = beforeSettings.agentStatusHooksEnabled !== false
+    const before = this.store.getSettings().agentStatusHooksEnabled !== false
     this.store.updateSettings(updates, { notifyListeners: true })
-    const settings = this.store.getSettings()
     if (updates.worktreeVisibilityDefaults !== undefined) {
       this.notifyReposChanged?.()
     }
     if (
-      (typeof updates.agentStatusHooksEnabled === 'boolean' &&
-        before !== updates.agentStatusHooksEnabled) ||
-      (updates.disabledTuiAgents !== undefined &&
-        !haveSameDisabledTuiAgents(beforeSettings.disabledTuiAgents, settings.disabledTuiAgents))
+      typeof updates.agentStatusHooksEnabled === 'boolean' &&
+      before !== updates.agentStatusHooksEnabled
     ) {
       await this.reconcileManagedAgentHooks()
     }
@@ -235,9 +230,9 @@ export class RuntimeClientSettingsController {
       await applyAgentStatusHooksEnabled(settings.agentStatusHooksEnabled !== false, settings, {
         shouldHydrateShellPath: getAppEnvironment().isPackaged(),
         onInstallError: recordManagedHookInstallFailure,
-        shouldContinue: (agent) => {
+        shouldContinue: () => {
           const current = this.store?.getSettings()
-          return current !== undefined && isAgentStatusHooksEnabledForAgent(current, agent)
+          return current !== undefined && isAgentStatusHooksEnabled(current)
         }
       })
     })

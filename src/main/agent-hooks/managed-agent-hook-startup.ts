@@ -22,8 +22,7 @@ export function reconcileStartupManagedAgentHooks(host: {
   void installManagedAgentHooks(host.getSettings(), {
     shouldHydrateShellPath: host.shouldHydrateShellPath,
     onInstallError: recordManagedHookInstallFailure,
-    shouldContinue: (agent) =>
-      shouldContinueManagedHookStartup(host.isQuitting(), host.getSettings(), agent)
+    shouldContinue: () => shouldContinueManagedHookStartup(host.isQuitting(), host.getSettings())
   }).catch((error: unknown) =>
     console.warn('[agent-hooks] failed to reconcile managed hooks on startup:', error)
   )

@@ -302,25 +302,16 @@ describe('resolveWorktreeStartupDraftAgent', () => {
       ...(requestedAgent ? { requestedAgent } : {})
     })
 
-  it('returns an enabled requested agent without detecting', async () => {
-    await expect(resolve({ defaultTuiAgent: 'claude' }, 'codex')).resolves.toBe('codex')
+  it('returns the requested agent without detecting, even one hidden in Settings', async () => {
+    await expect(
+      resolve({ defaultTuiAgent: 'claude', disabledTuiAgents: ['codex'] }, 'codex')
+    ).resolves.toBe('codex')
     expect(mocks.detectInstalledAgentsWithShellPathHydration).not.toHaveBeenCalled()
   })
 
   it('returns the default when nothing was requested', async () => {
     await expect(resolve({ defaultTuiAgent: 'claude' })).resolves.toBe('claude')
     expect(mocks.detectInstalledAgentsWithShellPathHydration).not.toHaveBeenCalled()
-  })
-
-  // The requested agent replaces the default rather than preceding it, so a disabled request goes
-  // straight to detection — the order the create has always used.
-  it('detects instead of using the default when the requested agent is disabled', async () => {
-    mocks.detectInstalledAgentsWithShellPathHydration.mockResolvedValue(['codex', 'gemini'])
-
-    await expect(
-      resolve({ defaultTuiAgent: 'claude', disabledTuiAgents: ['codex'] }, 'codex')
-    ).resolves.toBe('gemini')
-    expect(mocks.detectInstalledAgentsWithShellPathHydration).toHaveBeenCalledTimes(1)
   })
 
   it('starts no agent when the default is blank', async () => {

@@ -61,7 +61,7 @@ import { initializeReadyRuntimeServices } from './main-process-ready-runtime'
 
 beforeEach(() => {
   fixture.startCodexHooks.mockClear()
-  fixture.settings.disabledTuiAgents = []
+  fixture.settings.agentStatusHooksEnabled = true
 })
 
 describe('Codex hook startup', () => {
@@ -86,12 +86,12 @@ describe('Codex hook startup', () => {
     expect(ready).toBe(true)
   })
 
-  it("reads Codex's per-agent hook setting each time it is asked", async () => {
+  it('reads the hook setting each time it is asked', async () => {
     await initializeReadyRuntimeServices()
     const { isEnabled } = fixture.startCodexHooks.mock.calls[0]![0]
 
     expect(isEnabled()).toBe(true)
-    fixture.settings.disabledTuiAgents = ['codex']
+    fixture.settings.agentStatusHooksEnabled = false
     expect(isEnabled()).toBe(false)
   })
 })

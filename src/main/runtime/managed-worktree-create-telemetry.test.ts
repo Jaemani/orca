@@ -73,7 +73,7 @@ type RuntimeInternals = {
 
 function makeRuntime(repo: Record<string, unknown> = gitRepo): OrcaRuntimeService {
   const store = {
-    getSettings: () => ({ disabledTuiAgents: ['codex'], workspaceDir: '/worktrees' }),
+    getSettings: () => ({ disabledTuiAgents: [], workspaceDir: '/worktrees' }),
     getProjectHostSetups: () => []
   }
   // oxlint-disable-next-line typescript/consistent-type-assertions -- SAFETY: every store method this create path reaches is supplied above.
@@ -265,9 +265,10 @@ describe('runtime create events', () => {
       makeRuntime().createManagedWorktree({
         repoSelector: 'repo-1',
         name: 'app',
-        startupAgent: 'codex'
+        startupAgent: 'opencode',
+        startupLaunchPreferences: { model: 'opencode/any' }
       })
-    ).rejects.toThrow('Selected agent is disabled')
+    ).rejects.toThrow('The execution host cannot verify this OpenCode model launch.')
     expect(mocks.createLocal).not.toHaveBeenCalled()
     expect(mocks.track).not.toHaveBeenCalled()
   })

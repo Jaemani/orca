@@ -701,40 +701,6 @@ describe('launchWorkItemDirect', () => {
     expect(pasteDraftWhenAgentReady).not.toHaveBeenCalled()
   })
 
-  it('does not launch a disabled saved agent even when another agent is available', async () => {
-    mocks.ensureDetectedAgents.mockResolvedValue(['codex', 'claude'])
-    mocks.store.settings = {
-      defaultTuiAgent: 'claude',
-      disabledTuiAgents: ['codex'],
-      agentCmdOverrides: {}
-    }
-    const { launchWorkItemDirect } = await import('./launch-work-item-direct')
-
-    await expect(
-      launchWorkItemDirect({
-        item: {
-          title: 'Fix failing checks',
-          url: 'https://github.com/acme/repo/pull/1',
-          type: 'issue',
-          number: 1,
-          pasteContent: 'Fix the failing checks.'
-        },
-        repoId: 'repo-1',
-        openModalFallback: mocks.openModalFallback,
-        launchSource: 'task_page',
-        agentOverride: 'codex',
-        promptDelivery: 'submit-after-ready'
-      })
-    ).resolves.toBe(false)
-
-    expect(mocks.createWorktree).toHaveBeenCalled()
-    expect(mocks.updateWorktreeMeta).not.toHaveBeenCalled()
-    expect(mocks.pasteDraftWhenAgentReady).not.toHaveBeenCalled()
-    expect(mocks.toastError).toHaveBeenCalledWith(
-      'Selected agent is not available in the created workspace.'
-    )
-  })
-
   it('plans direct SSH workspace agent startup for the remote host platform', async () => {
     mocks.getConnectionId.mockReturnValue('ssh-1')
     mocks.ensureRemoteDetectedAgents.mockResolvedValue(['pi'])

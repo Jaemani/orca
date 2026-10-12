@@ -25,8 +25,7 @@ it('launches each acquisition under the current selection, not the account it wa
     claudeManagedAccounts: [],
     activeClaudeManagedAccountId: 'a',
     activeClaudeManagedAccountIdsByRuntime: undefined,
-    agentStatusHooksEnabled: false,
-    disabledTuiAgents: []
+    agentStatusHooksEnabled: false
   }
   const router = new ClaudeProfileRouter({
     getSettings: () => settings,
@@ -93,8 +92,7 @@ function routedResumeFixture() {
         claudeManagedAccounts: [],
         activeClaudeManagedAccountId: 'a',
         activeClaudeManagedAccountIdsByRuntime: undefined,
-        agentStatusHooksEnabled: false,
-        disabledTuiAgents: []
+        agentStatusHooksEnabled: false
       }),
       dataRoot: root,
       userHome: join(root, 'personal'),

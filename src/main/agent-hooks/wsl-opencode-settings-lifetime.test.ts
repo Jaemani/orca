@@ -10,7 +10,6 @@ import { createInstallPluginsHandler } from '../../wsl-guest/wsl-install-plugins
 import { WslHookRelayManager } from './wsl-hook-relay-manager'
 import { REINSTALL_MIN_INTERVAL_MS } from './wsl-hook-relay-deps'
 import type { MultiplexerTransport } from '../ssh/ssh-channel-multiplexer'
-import type { TuiAgent } from '../../shared/tui-agent'
 import {
   AGENT_HOOK_INSTALL_PLUGINS_METHOD,
   AGENT_HOOK_REQUEST_REPLAY_METHOD
@@ -47,7 +46,7 @@ describe.skipIf(process.platform === 'win32')('WSL public-manager settings lifet
   let manager: WslHookRelayManager
   let guests: ReturnType<typeof createGuest>[]
   let activeGuest: ReturnType<typeof createGuest>
-  let settings: { disabledTuiAgents: TuiAgent[] }
+  let settings: { agentStatusHooksEnabled: boolean }
   let requests: Record<string, unknown>[]
   let now: number
   let detectionCount: number
@@ -116,7 +115,7 @@ describe.skipIf(process.platform === 'win32')('WSL public-manager settings lifet
 
   beforeEach(() => {
     root = mkdtempSync(join(tmpdir(), 'orca-wsl-manager-boundary-'))
-    settings = { disabledTuiAgents: [] }
+    settings = { agentStatusHooksEnabled: true }
     requests = []
     now = Date.now()
     vi.spyOn(Date, 'now').mockImplementation(() => now)
@@ -167,10 +166,9 @@ describe.skipIf(process.platform === 'win32')('WSL public-manager settings lifet
     rmSync(root, { recursive: true, force: true })
   })
 
+  // Why initially enabled only: hooks off stops the relay, so a live relay always starts enabled.
   const cases = (['detect', 'hooks', 'plugin'] as const).flatMap((stage) =>
-    [true, false].flatMap((initialEnabled) =>
-      [true, false].map((toggleBack) => ({ stage, initialEnabled, toggleBack }))
-    )
+    [true, false].map((toggleBack) => ({ stage, initialEnabled: true, toggleBack }))
   )
 
   it.each(cases)(
@@ -178,7 +176,7 @@ describe.skipIf(process.platform === 'win32')('WSL public-manager settings lifet
     async ({ stage, initialEnabled, toggleBack }) => {
       pause = stage
       const setEnabled = (enabled: boolean) => {
-        settings = { disabledTuiAgents: enabled ? [] : ['opencode', 'opencode2'] }
+        settings = { agentStatusHooksEnabled: enabled }
       }
       setEnabled(initialEnabled)
       await manager.ensureForDistro('fixture')
@@ -248,12 +246,12 @@ describe.skipIf(process.platform === 'win32')('WSL public-manager settings lifet
     now += REINSTALL_MIN_INTERVAL_MS + 1
     const refresh = manager.ensureForDistro('fixture')
     await beforeSources.reached
-    settings = { disabledTuiAgents: ['opencode', 'opencode2'] }
+    settings = { agentStatusHooksEnabled: false }
     const disabled = manager.ensureForDistro('fixture')
     beforeSources.release()
     await pendingRequest.reached
     rejectRequest = true
-    settings = { disabledTuiAgents: [] }
+    settings = { agentStatusHooksEnabled: true }
     const restored = manager.ensureForDistro('fixture')
     pendingRequest.release()
     await Promise.all([refresh, disabled, restored])
@@ -278,7 +276,7 @@ describe.skipIf(process.platform === 'win32')('WSL public-manager settings lifet
     }
     const refresh = manager.ensureForDistro('fixture', undefined, 'omp')
     await pendingRequest.reached
-    settings.disabledTuiAgents = ['opencode', 'opencode2']
+    settings.agentStatusHooksEnabled = false
     const disabled = manager.ensureForDistro('fixture')
     pendingRequest.release()
     await secondKind.reached
@@ -287,7 +285,7 @@ describe.skipIf(process.platform === 'win32')('WSL public-manager settings lifet
       opencodePluginSource: '',
       opencode2PluginSource: ''
     })
-    settings.disabledTuiAgents = []
+    settings.agentStatusHooksEnabled = true
     const restored = manager.ensureForDistro('fixture')
     secondKind.release()
     await Promise.all([refresh, disabled, restored])
@@ -313,7 +311,7 @@ describe.skipIf(process.platform === 'win32')('WSL public-manager settings lifet
     now += REINSTALL_MIN_INTERVAL_MS + 1
     const refresh = manager.ensureForDistro('fixture')
     await beforeSources.reached
-    settings.disabledTuiAgents = ['opencode', 'opencode2']
+    settings.agentStatusHooksEnabled = false
     rejectHooks = true
     const waiters = Array.from({ length: 4 }, () => manager.ensureForDistro('fixture'))
     beforeSources.release()
@@ -321,6 +319,7 @@ describe.skipIf(process.platform === 'win32')('WSL public-manager settings lifet
     expect(hookCount).toBe(3)
     expect(requests).toHaveLength(1)
     expect(manager.getOpenCodeOverlayDir('fixture')).toBe(previous)
+    settings.agentStatusHooksEnabled = true
     await manager.ensureForDistro('fixture')
     expect(hookCount).toBe(3)
     now += REINSTALL_MIN_INTERVAL_MS + 1
@@ -328,8 +327,8 @@ describe.skipIf(process.platform === 'win32')('WSL public-manager settings lifet
     pendingRequest.release()
     await manager.ensureForDistro('fixture')
     expect(hookCount).toBe(4)
-    expect(requests.at(-1)).toMatchObject({ opencodePluginSource: '', opencode2PluginSource: '' })
-    expect(manager.getOpenCodeOverlayDir('fixture')).toBeNull()
+    expect(requests.at(-1)).toMatchObject(sources)
+    expect(manager.getOpenCodeOverlayDir('fixture')).toBe(previous)
   })
 
   it('keeps a disposed generation from publishing into a reconnected manager', async () => {

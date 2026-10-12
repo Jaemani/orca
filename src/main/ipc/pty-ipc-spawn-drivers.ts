@@ -33,7 +33,6 @@ export function createPtyIpcSpawnDrivers(ctx: {
     ) => string | null,
     getSettings?: () => {
       agentStatusHooksEnabled?: boolean
-      disabledTuiAgents?: TuiAgent[]
       httpProxyUrl?: string
       httpProxyBypassRules?: string
     },

@@ -3,9 +3,9 @@ import type { GlobalSettings } from '../../shared/global-settings-types'
 import type { VerifiedCodexResumeSource } from '../codex/codex-session-resume-preparation'
 
 /**
- * Turning Codex off in the per-agent hook settings removes Orca's Codex hook
- * entry. Launch prep and session resume must read that same opt-out, or the
- * next Codex launch writes the entry straight back.
+ * Turning agent status hooks off removes Orca's Codex hook entry. Launch prep
+ * and session resume must read that same switch, or the next Codex launch
+ * writes the entry straight back.
  */
 const SYSTEM_HOME = '/home/user/.codex'
 const ACCOUNT_HOME = '/accounts/one/.codex'
@@ -73,23 +73,13 @@ const HOOK_SETTINGS: readonly {
   codexHooksOn: boolean
 }[] = [
   {
-    name: 'Codex turned off per agent',
-    settings: { agentStatusHooksEnabled: true, disabledTuiAgents: ['codex'] },
-    codexHooksOn: false
-  },
-  {
-    name: 'every agent on',
-    settings: { agentStatusHooksEnabled: true, disabledTuiAgents: [] },
-    codexHooksOn: true
-  },
-  {
-    name: 'another agent turned off',
-    settings: { agentStatusHooksEnabled: true, disabledTuiAgents: ['claude'] },
+    name: 'the global switch on',
+    settings: { agentStatusHooksEnabled: true },
     codexHooksOn: true
   },
   {
     name: 'the global switch off',
-    settings: { agentStatusHooksEnabled: false, disabledTuiAgents: [] },
+    settings: { agentStatusHooksEnabled: false },
     codexHooksOn: false
   }
 ]
@@ -117,7 +107,7 @@ function resumeFrom(homePath: string): Promise<unknown> {
   })
 }
 
-describe('Codex launch prep honours the per-agent hook opt-out', () => {
+describe('Codex launch prep honours the hook off switch', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     mocks.isHostSystemDefaultRealHomeSelected.mockReturnValue(false)
@@ -197,7 +187,7 @@ describe('Codex launch prep honours the per-agent hook opt-out', () => {
   )
 
   it("never makes a plain terminal or a structured launch wait for Codex's hook hashes", async () => {
-    mocks.settings = { agentStatusHooksEnabled: true, disabledTuiAgents: [] }
+    mocks.settings = { agentStatusHooksEnabled: true }
     mocks.prepareForCodexLaunchAsync.mockResolvedValue(ACCOUNT_HOME)
 
     await prepareCodexRuntimeHomeForLaunch()

@@ -13,7 +13,7 @@ import { ManagedCodexHomeTemporarilyUnavailableError } from '../codex-accounts/h
 import { codexHookService } from '../codex/hook-service'
 import { reconcileCodexHooksForLaunch } from '../codex/codex-hook-reconcile'
 import { ensureCodexDaemonSocketGuard } from '../codex/codex-config-mirror'
-import { isAgentStatusHooksEnabledForAgent } from '../agent-hooks/managed-agent-hook-controls'
+import { isAgentStatusHooksEnabled } from '../agent-hooks/managed-agent-hook-controls'
 import { getOrcaManagedCodexHomePath, getSystemCodexHomePath } from '../codex/codex-home-paths'
 import { normalizeRuntimePathForComparison } from '../../shared/cross-platform-path'
 import { mainProcessState as state } from './main-process-state'
@@ -111,8 +111,7 @@ export async function prepareCodexPinnedLaunchHome(
 ): Promise<void> {
   const isSystemHome =
     normalizeRuntimePathForComparison(home) === normalizeRuntimePathForComparison(systemHomePath)
-  const isHooksEnabled = (): boolean =>
-    isAgentStatusHooksEnabledForAgent(state.store?.getSettings(), 'codex')
+  const isHooksEnabled = (): boolean => isAgentStatusHooksEnabled(state.store?.getSettings())
   try {
     if (isSystemHome) {
       // Why bounded: the resume waits only briefly for a reconcile; it runs on ~/.codex whatever the selection.

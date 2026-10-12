@@ -749,7 +749,6 @@
                 "3f0ea9aa0d": "No se pudo generar el comando de inicio del agente.",
                 "46f1a2c9bd": "La entrada del comando está vacía.",
                 "8eb541cc83": "No se detectó el agente seleccionado en este host de espacio de trabajo.",
-                "b96e091fc9": "El agente seleccionado está deshabilitado en Ajustes.",
                 "a7ac8717c7": "Elige un agente antes de comenzar."
               }
             }
@@ -16506,7 +16505,6 @@
           "08efc3ae12": "Automatización Hermes actualizada.",
           "e431bb85d4": "Elija un espacio de trabajo en el mismo host que esta automatización de Hermes.",
           "32534e7c9c": "Elija un espacio de trabajo disponible antes de guardar.",
-          "2360ffc956": "Elija un agente habilitado antes de guardar.",
           "6e91dab317": "Ingrese un horario avanzado válido antes de guardar.",
           "64bdb2304f": "Elija un horario admitido antes de guardar.",
           "2430fecf53": "Elija una ubicación de ejecución e ingrese un mensaje antes de guardar.",
@@ -18698,7 +18696,6 @@
       "startSession": "Iniciar sesión nueva",
       "starting": "Iniciando…",
       "noContext": "No hay contexto de sesión disponible para continuar en una sesión nueva.",
-      "agentDisabled": "{{agent}} está deshabilitado en la configuración de agentes.",
       "agentUnavailable": "No se detectó {{agent}} en el host de este espacio de trabajo.",
       "sent": "El contexto de la sesión se envió a {{agent}} en una sesión nueva.",
       "deliveryFailed": "La nueva sesión de {{agent}} se inició, pero no se pudo enviar su contexto.",

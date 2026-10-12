@@ -30,7 +30,7 @@ vi.mock('../codex/codex-hook-reconcile', () => ({
   reconcileCodexHooksForLaunch: mocks.reconcileCodexHooksForLaunch
 }))
 vi.mock('../agent-hooks/managed-agent-hook-controls', () => ({
-  isAgentStatusHooksEnabledForAgent: () => mocks.hooksEnabled
+  isAgentStatusHooksEnabled: () => mocks.hooksEnabled
 }))
 vi.mock('../codex/codex-home-paths', async (importOriginal) => ({
   ...(await importOriginal<object>()),

@@ -15,7 +15,7 @@ import { handleGpuChildCrash } from './gpu-lifecycle'
 import { isGpuFallbackCrashCandidate } from '../crash-reporting/gpu-crash-fallback-decision'
 import { startCodexHooks } from '../codex/codex-hook-reconcile'
 import { hydrateAgentCliShellPath } from '../agent-hooks/local-agent-cli-presence'
-import { isAgentStatusHooksEnabledForAgent } from '../agent-hooks/managed-agent-hook-controls'
+import { isAgentStatusHooksEnabled } from '../agent-hooks/managed-agent-hook-controls'
 import { reconcileStartupManagedAgentHooks } from '../agent-hooks/managed-agent-hook-startup'
 import { shouldInstallManagedHooks } from './configure-process'
 import { mainProcessState as state } from './main-process-state'
@@ -104,7 +104,7 @@ export async function initializeReadyRuntimeServices(): Promise<void> {
   // and launches find the reconcile in flight before CLI detection ends.
   startCodexHooks({
     pathReady: app.isPackaged ? hydrateAgentCliShellPath() : Promise.resolve(),
-    isEnabled: () => isAgentStatusHooksEnabledForAgent(store.getSettings(), 'codex'),
+    isEnabled: () => isAgentStatusHooksEnabled(store.getSettings()),
     resolveLaunchHome: () => {
       if (!state.codexRuntimeHome) {
         throw new Error('Codex runtime home service is not initialized')

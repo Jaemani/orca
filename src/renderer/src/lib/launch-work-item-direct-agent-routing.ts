@@ -1,7 +1,7 @@
 import type { TuiAgent } from '../../../shared/tui-agent'
 import type { AppState } from '@/store/types'
 import { TUI_AGENT_CONFIG } from '../../../shared/tui-agent-config'
-import { isTuiAgentEnabled, pickTuiAgent } from '../../../shared/tui-agent-selection'
+import { pickTuiAgent } from '../../../shared/tui-agent-selection'
 import { buildDirectWorkItemAgentStartupPlan } from '@/lib/launch-work-item-direct-agent'
 import type { AgentSessionLaunchPlan } from '@/lib/agent-session-launch-plan'
 import { resolveSourceControlLaunchPlatform } from '@/lib/source-control-launch-platform'
@@ -60,9 +60,7 @@ export async function resolveDirectWorkItemAgent(args: {
   if (args.agentOverride !== undefined) {
     return {
       agent: args.agentOverride,
-      unavailable:
-        !detectedAgents.includes(args.agentOverride) ||
-        !isTuiAgentEnabled(args.agentOverride, args.latestStore.settings?.disabledTuiAgents)
+      unavailable: !detectedAgents.includes(args.agentOverride)
     }
   }
   return {

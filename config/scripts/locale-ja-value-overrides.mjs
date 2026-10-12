@@ -444,7 +444,6 @@ const JA_AUDIT_OVERRIDES = {
     'Agent スキルのセットアップを実行する前に、Orca CLI をインストールしてください。',
   'Run grok in a terminal on the computer running Orca and wait for it to start. If prompted, complete sign-in, then retry usage. You do not need to send a chat message.':
     'Orca を実行しているコンピュータのターミナルで grok を実行し、起動するまで待ってください。サインインを求められた場合は完了してから、使用状況を再取得してください。チャットメッセージを送る必要はありません。',
-  'Choose an enabled agent before saving.': '保存する前に、有効な Agent を選択してください。',
   'Selected agent is disabled. Choose an enabled agent before creating.':
     '選択した Agent は無効です。作成する前に、有効な Agent を選択してください。',
   'Choose an agent before starting.': '開始する前に、 Agent を選択してください。',

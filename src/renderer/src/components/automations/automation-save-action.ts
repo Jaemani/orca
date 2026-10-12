@@ -1,5 +1,4 @@
 import { toast } from 'sonner'
-import { isTuiAgentEnabled } from '../../../../shared/tui-agent-selection'
 import {
   isValidAutomationCronSchedule,
   isValidAutomationSchedule
@@ -18,8 +17,7 @@ import type { AutomationSaveContext } from './automation-save-context'
 /** Validates editor input then delegates the provider-specific save transaction. */
 export function createAutomationSaveAction(context: AutomationSaveContext) {
   return async function saveAutomation(now = Date.now()): Promise<void> {
-    const { store, local, destinationForm, destination } = context
-    const { settings } = store
+    const { local, destinationForm, destination } = context
     const {
       draft,
       editingAutomationId,
@@ -68,19 +66,6 @@ export function createAutomationSaveAction(context: AutomationSaveContext) {
         translate(
           'auto.components.automations.AutomationsPage.6e91dab317',
           'Enter a valid advanced schedule before saving.'
-        )
-      )
-      return
-    }
-    if (
-      editingAutomationId === null &&
-      !isHermesSave &&
-      !isTuiAgentEnabled(draft.agentId, settings?.disabledTuiAgents)
-    ) {
-      toast.error(
-        translate(
-          'auto.components.automations.AutomationsPage.2360ffc956',
-          'Choose an enabled agent before saving.'
         )
       )
       return

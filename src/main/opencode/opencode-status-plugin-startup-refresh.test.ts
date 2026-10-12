@@ -28,10 +28,4 @@ describe('refreshInstalledOpenCodeStatusPlugins', () => {
     expect(refreshV1).not.toHaveBeenCalled()
     expect(refreshV2).not.toHaveBeenCalled()
   })
-
-  it('skips a disabled variant only', () => {
-    refreshInstalledOpenCodeStatusPlugins({ disabledTuiAgents: ['opencode2'] })
-    expect(refreshV1).toHaveBeenCalledTimes(1)
-    expect(refreshV2).not.toHaveBeenCalled()
-  })
 })

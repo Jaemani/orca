@@ -4,7 +4,6 @@ import { ensureDetectedAgentsForWorktree } from '@/lib/agent-detection-target-in
 import { launchAgentInNewTab } from '@/lib/launch-agent-in-new-tab'
 import { newAgentLaunchRequestId } from '@/lib/agent-launch-request-id'
 import { useAppStore } from '@/store'
-import { isTuiAgentEnabled } from '../../../shared/tui-agent-selection'
 import type { LaunchSource } from '../../../shared/telemetry-events'
 import type { TuiAgent } from '../../../shared/tui-agent'
 import { translate } from '@/i18n/i18n'
@@ -25,19 +24,7 @@ export async function detectAgentSessionContinuationAgents(
 }
 
 async function ensureAgentAvailable(agent: TuiAgent, worktreeId: string): Promise<boolean> {
-  const state = useAppStore.getState()
   const label = getAgentLabel(agent)
-  if (!isTuiAgentEnabled(agent, state.settings?.disabledTuiAgents)) {
-    toast.error(
-      translate(
-        'components.agentSessionContinuation.agentDisabled',
-        '{{agent}} is disabled in Agent settings.',
-        { agent: label }
-      )
-    )
-    return false
-  }
-
   let detectedAgents: TuiAgent[]
   try {
     detectedAgents = await detectAgentSessionContinuationAgents(worktreeId)

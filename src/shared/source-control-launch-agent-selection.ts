@@ -22,10 +22,11 @@ export function pickSourceControlLaunchAgent(args: {
   detectedAgents: TuiAgent[]
   disabledAgents?: TuiAgent[]
 }): TuiAgent | null {
-  const enabledAgents = filterEnabledTuiAgents(args.detectedAgents, args.disabledAgents)
-  if (args.savedAgent && enabledAgents.includes(args.savedAgent)) {
+  // A saved agent is the user's explicit choice; hiding only skips agents in the automatic pick.
+  if (args.savedAgent && args.detectedAgents.includes(args.savedAgent)) {
     return args.savedAgent
   }
+  const enabledAgents = filterEnabledTuiAgents(args.detectedAgents, args.disabledAgents)
   if (
     args.defaultAgent &&
     args.defaultAgent !== 'blank' &&

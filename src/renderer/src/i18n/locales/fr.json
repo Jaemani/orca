@@ -850,7 +850,6 @@
                 "3f0ea9aa0d": "Impossible de construire la commande de lancement de l'agent.",
                 "46f1a2c9bd": "La saisie de commande est vide.",
                 "8eb541cc83": "L'agent sélectionné n'a pas été détecté sur l'hôte de cet espace de travail.",
-                "b96e091fc9": "L'agent sélectionné est désactivé dans les Paramètres.",
                 "a7ac8717c7": "Choisissez un agent avant de démarrer."
               }
             }
@@ -16583,7 +16582,6 @@
           "08efc3ae12": "Automatisation Hermes mise à jour.",
           "e431bb85d4": "Choisissez un espace de travail sur le même hôte que cette automatisation Hermes.",
           "32534e7c9c": "Choisissez un espace de travail disponible avant d'enregistrer.",
-          "2360ffc956": "Choisissez un agent activé avant d'enregistrer.",
           "6e91dab317": "Saisissez une planification avancée valide avant d'enregistrer.",
           "64bdb2304f": "Choisissez une planification prise en charge avant d'enregistrer.",
           "2430fecf53": "Choisissez un lieu d'exécution et saisissez un prompt avant d'enregistrer.",
@@ -18800,7 +18798,6 @@
       "startSession": "Démarrer une nouvelle session",
       "starting": "Démarrage…",
       "noContext": "Aucun contexte de session disponible pour continuer dans une nouvelle session.",
-      "agentDisabled": "{{agent}} est désactivé dans les paramètres des Agents.",
       "agentUnavailable": "{{agent}} n'a pas été détecté sur cet hôte d'espace de travail.",
       "sent": "Contexte de session envoyé à {{agent}} dans une nouvelle session.",
       "deliveryFailed": "La nouvelle session {{agent}} a démarré, mais son contexte n'a pas pu être envoyé.",

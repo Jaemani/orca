@@ -15,16 +15,6 @@ describe('checkSourceControlAgentActionLaunch', () => {
     })
   })
 
-  it('rejects disabled agents', () => {
-    expect(
-      checkSourceControlAgentActionLaunch({
-        ...BASE,
-        detectedAgents: ['codex'],
-        disabledAgents: ['codex']
-      })
-    ).toEqual({ ok: false, error: 'The selected agent is disabled in Settings.' })
-  })
-
   it('rejects agents not detected on the current host', () => {
     expect(
       checkSourceControlAgentActionLaunch({ ...BASE, agent: 'claude', detectedAgents: ['codex'] })

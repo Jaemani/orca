@@ -21,7 +21,6 @@ import {
   DEFAULT_SOURCE_CONTROL_ACTION_COMMAND_TEMPLATES,
   renderSourceControlActionCommandTemplate
 } from '../../../shared/source-control-ai-actions'
-import { isTuiAgentEnabled } from '../../../shared/tui-agent-selection'
 import type { GitHubWorkItem } from '../../../shared/github/work-item-types'
 import type { TuiAgent } from '../../../shared/tui-agent'
 import type { WorkspaceSource as WorkspaceCreateTelemetrySource } from '../../../shared/workspace-source'
@@ -53,13 +52,6 @@ async function detectAgentsForConnection(
     : await store.ensureDetectedAgents()
 }
 
-function isAgentAvailable(agent: TuiAgent, detectedAgents: TuiAgent[]): boolean {
-  return (
-    detectedAgents.includes(agent) &&
-    isTuiAgentEnabled(agent, useAppStore.getState().settings?.disabledTuiAgents)
-  )
-}
-
 async function resolveSavedAgentOverride(
   savedAgent: TuiAgent | null | undefined,
   connectionId: string | null | undefined
@@ -68,7 +60,7 @@ async function resolveSavedAgentOverride(
     return { kind: 'launch-default' }
   }
   const detectedAgents = await detectAgentsForConnection(connectionId)
-  if (!isAgentAvailable(savedAgent, detectedAgents)) {
+  if (!detectedAgents.includes(savedAgent)) {
     toast.error(
       translate(
         'auto.lib.fix.checks.agent.launch.4c7f783a7a',
@@ -86,7 +78,7 @@ async function pickExistingWorktreeAgent(
 ): Promise<TuiAgent | null> {
   const detectedAgents = await ensureDetectedAgentsForWorktree(useAppStore.getState(), worktreeId)
   if (savedAgent) {
-    if (isAgentAvailable(savedAgent, detectedAgents)) {
+    if (detectedAgents.includes(savedAgent)) {
       return savedAgent
     }
     toast.error(

@@ -4,36 +4,32 @@ import {
   isSafeOverrideExecutableToken
 } from '../../shared/managed-agent-command-token'
 import { MANAGED_AGENT_HOOK_TARGETS } from '../../shared/managed-agent-hook-targets'
-import { normalizeDisabledTuiAgents } from '../../shared/tui-agent-selection'
 import type { GlobalSettings } from '../../shared/global-settings-types'
 import type { TuiAgentDetectionCommand } from '../ipc/tui-agent-detection-commands'
 import { parseClaudeCliVersion } from '../claude/claude-hook-event-versions'
 
 export type ManagedHookDetectionSettings = Partial<
-  Pick<GlobalSettings, 'agentCmdOverrides' | 'disabledTuiAgents' | 'agentStatusHooksEnabled'>
+  Pick<GlobalSettings, 'agentCmdOverrides' | 'agentStatusHooksEnabled'>
 > | null
 
 export function buildManagedHookDetectionCommands(
   settings: ManagedHookDetectionSettings,
   platform: NodeJS.Platform
 ): TuiAgentDetectionCommand[] {
-  const disabled = new Set(normalizeDisabledTuiAgents(settings?.disabledTuiAgents))
-  return MANAGED_AGENT_HOOK_TARGETS.filter((target) => !disabled.has(target.tuiAgent)).flatMap(
-    (target) => {
-      const commands = new Set(target.executableCandidates)
-      const override = extractExecutableToken(settings?.agentCmdOverrides?.[target.tuiAgent], {
-        platform
-      })
-      if (override && isSafeOverrideExecutableToken(override)) {
-        commands.add(override)
-      }
-      return [...commands].map((cmd) => ({
-        id: target.tuiAgent,
-        cmd,
-        ...(target.agent === 'claude' ? { reportVersion: true as const } : {})
-      }))
+  return MANAGED_AGENT_HOOK_TARGETS.flatMap((target) => {
+    const commands = new Set(target.executableCandidates)
+    const override = extractExecutableToken(settings?.agentCmdOverrides?.[target.tuiAgent], {
+      platform
+    })
+    if (override && isSafeOverrideExecutableToken(override)) {
+      commands.add(override)
     }
-  )
+    return [...commands].map((cmd) => ({
+      id: target.tuiAgent,
+      cmd,
+      ...(target.agent === 'claude' ? { reportVersion: true as const } : {})
+    }))
+  })
 }
 
 export function detectedManagedHookAgents(values: unknown): AgentHookTarget[] {

@@ -160,9 +160,9 @@ describe('OrcaRuntimeService', () => {
     expect(spawnCall?.env?.ORCA_AGENT_LAUNCH_TOKEN).toBeUndefined()
   })
 
-  it('keeps disabled bare agent command terminal creates unchanged', async () => {
+  it('launches an agent hidden in Settings when it is asked for explicitly', async () => {
     const spawn = vi.fn().mockResolvedValue({ id: 'pty-bg' })
-    const runtimeStore = {
+    const runtime = new OrcaRuntimeService({
       ...store,
       getSettings: () => ({
         ...store.getSettings(),
@@ -171,8 +171,7 @@ describe('OrcaRuntimeService', () => {
         agentDefaultArgs: { codex: '--dangerously-bypass-approvals-and-sandbox' },
         agentDefaultEnv: {}
       })
-    }
-    const runtime = new OrcaRuntimeService(runtimeStore)
+    })
     runtime.setPtyController({
       spawn,
       write: () => true,
@@ -180,15 +179,13 @@ describe('OrcaRuntimeService', () => {
       getForegroundProcess: async () => null
     })
 
-    await runtime.createTerminal(`path:${TEST_WORKTREE_PATH}`, {
-      command: 'codex'
-    })
+    await runtime.createTerminal(`path:${TEST_WORKTREE_PATH}`, { startupAgent: 'codex' })
+    await runtime.createTerminal(`path:${TEST_WORKTREE_PATH}`, { command: 'codex' })
 
-    const spawnCall = spawn.mock.calls[0]?.[0] as
-      | { command?: string; env?: Record<string, string> }
-      | undefined
-    expect(spawnCall?.command).toBe('codex')
-    expect(spawnCall?.env?.ORCA_AGENT_LAUNCH_TOKEN).toBeUndefined()
+    expect(spawn.mock.calls.map((call) => call[0].command)).toEqual([
+      "codex '--dangerously-bypass-approvals-and-sandbox'",
+      "codex '--dangerously-bypass-approvals-and-sandbox'"
+    ])
   })
 
   it('sends Settings agent defaults through renderer-backed bare agent terminal creates', async () => {

@@ -32,12 +32,10 @@ function prepareMethod() {
   return method
 }
 
-function runtimeWithSettings(enabled = true, disabledTuiAgents: string[] = []): OrcaRuntimeService {
+function runtimeWithSettings(enabled = true): OrcaRuntimeService {
+  // oxlint-disable-next-line typescript/consistent-type-assertions -- SAFETY: these handlers read only getClientSettings from the runtime.
   return {
-    getClientSettings: vi.fn(() => ({
-      agentStatusHooksEnabled: enabled,
-      disabledTuiAgents
-    }))
+    getClientSettings: vi.fn(() => ({ agentStatusHooksEnabled: enabled }))
   } as unknown as OrcaRuntimeService
 }
 
@@ -67,10 +65,7 @@ describe('agent hook RPC methods', () => {
     })
   })
 
-  it.each([
-    [false, []],
-    [true, ['codex']]
-  ])('does not install when hooks are disabled (%s, %j)', async (enabled, disabledTuiAgents) => {
+  it('does not install when hooks are disabled', async () => {
     const method = prepareMethod()
     const params = method.params!.parse({
       codexHome: '/home/jin/.local/share/orca/codex-runtime-home/home',
@@ -79,7 +74,7 @@ describe('agent hook RPC methods', () => {
     })
 
     await expect(
-      method.handler(params, { runtime: runtimeWithSettings(enabled, disabledTuiAgents) })
+      method.handler(params, { runtime: runtimeWithSettings(false) })
     ).resolves.toBeNull()
     expect(installForRuntimeHomeSerializedMock).not.toHaveBeenCalled()
   })

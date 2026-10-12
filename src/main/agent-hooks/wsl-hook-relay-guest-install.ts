@@ -104,10 +104,7 @@ async function installGuestHooksAndPlugins(
       return
     }
     const currentSettings = deps.managedHookSettings()
-    const settings = currentSettings && {
-      ...currentSettings,
-      disabledTuiAgents: currentSettings.disabledTuiAgents?.slice()
-    }
+    const settings = currentSettings && { ...currentSettings }
     const settingsKey = openCodePluginSettingsKey(settings)
     state.lastAttemptOpenCodeSettings = settingsKey
     const overlay = await requestGuestOpenCodeOverlayDir(

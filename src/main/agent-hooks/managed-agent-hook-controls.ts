@@ -1,14 +1,7 @@
 import type { AgentHookInstallStatus, AgentHookTarget } from '../../shared/agent-hook-types'
-import {
-  getManagedAgentHookTarget,
-  isManagedAgentHookTarget
-} from '../../shared/managed-agent-hook-targets'
-import { normalizeDisabledTuiAgents } from '../../shared/tui-agent-selection'
+import { getManagedAgentHookTarget } from '../../shared/managed-agent-hook-targets'
 import type { GlobalSettings } from '../../shared/global-settings-types'
-import {
-  isAgentStatusHooksEnabled,
-  isAgentStatusHooksEnabledForAgent
-} from '../../shared/agent-status-hooks-setting'
+import { isAgentStatusHooksEnabled } from '../../shared/agent-status-hooks-setting'
 import { probeClaudeCliVersion } from '../claude/claude-hook-event-versions'
 import { detectLocalManagedAgentCliPresence } from './local-agent-cli-presence'
 import {
@@ -22,13 +15,10 @@ import {
 } from './managed-agent-hook-registry'
 
 export { MANAGED_AGENT_HOOK_INSTALLERS } from './managed-agent-hook-registry'
-export {
-  isAgentStatusHooksEnabled,
-  isAgentStatusHooksEnabledForAgent
-} from '../../shared/agent-status-hooks-setting'
+export { isAgentStatusHooksEnabled } from '../../shared/agent-status-hooks-setting'
 
 type ManagedHookSettings = Partial<
-  Pick<GlobalSettings, 'agentCmdOverrides' | 'agentStatusHooksEnabled' | 'disabledTuiAgents'>
+  Pick<GlobalSettings, 'agentCmdOverrides' | 'agentStatusHooksEnabled'>
 > | null
 
 type InstallOptions = {
@@ -59,10 +49,9 @@ export function resolveStartupManagedHookAction(
 
 export function shouldContinueManagedHookStartup(
   isQuitting: boolean,
-  settings: ManagedHookSettings,
-  agent: AgentHookTarget
+  settings: ManagedHookSettings
 ): boolean {
-  return !isQuitting && isAgentStatusHooksEnabledForAgent(settings, agent)
+  return !isQuitting && isAgentStatusHooksEnabled(settings)
 }
 
 function errorStatus(agent: AgentHookTarget, error: unknown): AgentHookInstallStatus {
@@ -141,9 +130,7 @@ export async function installManagedAgentHooks(
 ): Promise<AgentHookInstallStatus[]> {
   await refreshExistingManagedScripts(options)
   const installers = selectedInstallers(options)
-  const disabled = new Set(normalizeDisabledTuiAgents(settings?.disabledTuiAgents))
-  const enabledInstallers = installers.filter(([agent]) => !disabled.has(agent))
-  const targets = enabledInstallers.flatMap(([agent]) => {
+  const targets = installers.flatMap(([agent]) => {
     const target = getManagedAgentHookTarget(agent)
     return target ? [target] : []
   })
@@ -154,20 +141,12 @@ export async function installManagedAgentHooks(
     })
   } catch (error) {
     const detail = error instanceof Error ? error.message : String(error)
-    return installers.map(([agent]) =>
-      disabled.has(agent)
-        ? skippedStatus(agent, 'agent_disabled', 'Agent is disabled in Settings.')
-        : skippedStatus(agent, 'cli_presence_unknown', detail)
-    )
+    return installers.map(([agent]) => skippedStatus(agent, 'cli_presence_unknown', detail))
   }
 
   const results: AgentHookInstallStatus[] = []
   for (const entry of installers) {
     const [agent] = entry
-    if (disabled.has(agent)) {
-      results.push(skippedStatus(agent, 'agent_disabled', 'Agent is disabled in Settings.'))
-      continue
-    }
     if (options.shouldContinue && !options.shouldContinue(agent)) {
       results.push(
         skippedStatus(
@@ -256,21 +235,5 @@ export async function applyAgentStatusHooksEnabled(
   if (!enabled) {
     return await removeManagedAgentHooks()
   }
-  const disabled = normalizeDisabledTuiAgents(settings?.disabledTuiAgents).filter(
-    isManagedAgentHookTarget
-  )
-  const installed = await installManagedAgentHooks(settings, options)
-  const disabledToRemove = options.shouldContinue
-    ? disabled.filter((agent) => !options.shouldContinue?.(agent))
-    : disabled
-  if (disabledToRemove.length === 0) {
-    return installed
-  }
-  const removed = new Map(
-    (await removeManagedAgentHooks({ agents: disabledToRemove })).map((status) => [
-      status.agent,
-      status
-    ])
-  )
-  return installed.map((status) => removed.get(status.agent) ?? status)
+  return await installManagedAgentHooks(settings, options)
 }

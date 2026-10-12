@@ -156,7 +156,7 @@ function resolveWorkerStartAgent(args: {
     throw new OrchestrationError('agent_unconfigured', args.missingAgentMessage)
   }
   if (agent) {
-    args.runtime.validateOrchestrationAgentLauncher(agent)
+    args.runtime.validateOrchestrationAgentLauncher()
     return {
       agent,
       launch: resolveWorkerLaunchPreferences({

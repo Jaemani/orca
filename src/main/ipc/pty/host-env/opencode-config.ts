@@ -5,7 +5,6 @@ import {
 import { openCode2HookService, openCodeHookService } from '../../../opencode/hook-service'
 import { resolveOpenCodeSourceConfigDir, restoreOrStripOverlayEnv } from './pi-agent'
 import { selectOpenCodeHookAgent } from '../../../../shared/opencode-launch-command'
-import { isTuiAgentEnabled } from '../../../../shared/tui-agent-selection'
 import { resolveOpenCodeConfigDirectory } from '../../../../shared/opencode-config-directory'
 import { readSessionShellStartupEnvVar } from '../../../pty/shell-startup-env'
 import type { BuildPtyHostEnvOptions } from './types'
@@ -43,15 +42,14 @@ export function applyOpenCodeStatusPluginEnv(
   config: OpenCodeSourceConfig,
   options: Pick<
     BuildPtyHostEnvOptions,
-    'launchAgent' | 'agentStatusHooksEnabled' | 'disabledTuiAgents' | 'isWsl' | 'shellPath'
+    'launchAgent' | 'agentStatusHooksEnabled' | 'isWsl' | 'shellPath'
   >,
   command: string | undefined
 ): 'opencode' | 'opencode2' | null {
   const agent = selectOpenCodeHookAgent(
     options.launchAgent,
     command,
-    (candidate) =>
-      options.agentStatusHooksEnabled && isTuiAgentEnabled(candidate, options.disabledTuiAgents)
+    () => options.agentStatusHooksEnabled
   )
   restoreOrStripOverlayEnv(
     env,

@@ -1,6 +1,5 @@
 import { buildAgentStartupPlan, planAgentCliArgsSuffix } from '@/lib/tui-agent-startup'
 import { CLIENT_PLATFORM } from '@/lib/new-workspace'
-import { isTuiAgentEnabled } from '../../../shared/tui-agent-selection'
 import type { TuiAgent } from '../../../shared/tui-agent'
 import { translate } from '@/i18n/i18n'
 import { resolveLocalWindowsAgentStartupShell } from '../../../shared/windows-terminal-shell'
@@ -16,7 +15,6 @@ export function checkSourceControlAgentActionLaunch(args: {
   agent: TuiAgent | null
   commandInput: string
   detectedAgents: TuiAgent[]
-  disabledAgents?: TuiAgent[]
   cmdOverrides?: Partial<Record<TuiAgent, string>>
   agentArgs?: string | null
   platform?: NodeJS.Platform
@@ -32,15 +30,6 @@ export function checkSourceControlAgentActionLaunch(args: {
       error: translate(
         'auto.lib.source.control.agent.action.plan.a7ac8717c7',
         'Choose an agent before starting.'
-      )
-    }
-  }
-  if (!isTuiAgentEnabled(agent, args.disabledAgents)) {
-    return {
-      ok: false,
-      error: translate(
-        'auto.lib.source.control.agent.action.plan.b96e091fc9',
-        'The selected agent is disabled in Settings.'
       )
     }
   }

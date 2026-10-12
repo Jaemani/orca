@@ -1,6 +1,6 @@
 import { withFreshOmpLaunch } from '../../shared/omp-fresh-launch'
 import { describe, expect, it, vi } from 'vitest'
-import { piBuildPtyEnvMock, spawnMock } from './pty-ipc-mock-registry'
+import { spawnMock } from './pty-ipc-mock-registry'
 import { TEST_CODEX_HOME } from './pty-ipc-test-constants'
 import { setupPtyIpcSuite } from './pty-ipc-test-harness'
 import { LocalPtyProvider } from '../providers/local-pty-provider'
@@ -96,55 +96,6 @@ describe('registerPtyHandlers', () => {
       }
     )
 
-    it('does not install managed Pi extensions when Pi is disabled', () => {
-      piBuildPtyEnvMock.mockClear()
-
-      buildPtyHostEnv(
-        'pty-pi-disabled',
-        {},
-        {
-          isPackaged: true,
-          userDataPath: '/tmp/orca-user-data',
-          selectedCodexHomePath: null,
-          agentStatusHooksEnabled: true,
-          disabledTuiAgents: ['pi']
-        }
-      )
-
-      expect(piBuildPtyEnvMock.mock.calls.map(([, , kind]) => kind)).toEqual(['omp'])
-    })
-
-    it('does not install managed OMP extensions when OMP is disabled', () => {
-      piBuildPtyEnvMock.mockClear()
-
-      const env = buildPtyHostEnv(
-        'pty-omp-disabled',
-        {},
-        {
-          isPackaged: true,
-          userDataPath: '/tmp/orca-user-data',
-          selectedCodexHomePath: null,
-          launchCommand: 'omp',
-          launchAgent: 'omp',
-          agentStatusHooksEnabled: true,
-          disabledTuiAgents: ['omp']
-        }
-      )
-
-      expect(piBuildPtyEnvMock).not.toHaveBeenCalled()
-      expect(env.ORCA_OMP_FRESH_CONFIG).toBe('/tmp/orca-fresh-session.yml')
-    })
-
-    it('threads disabled Pi settings through a bare PTY spawn', async () => {
-      piBuildPtyEnvMock.mockClear()
-
-      await spawnAndGetEnv(undefined, undefined, undefined, () => ({
-        agentStatusHooksEnabled: true,
-        disabledTuiAgents: ['pi']
-      }))
-
-      expect(piBuildPtyEnvMock.mock.calls.map(([, , kind]) => kind)).toEqual(['omp'])
-    })
     it('prepares fresh OMP settings even when status hooks are disabled', () => {
       const env = buildPtyHostEnv(
         'fresh-without-hooks',
@@ -470,17 +421,6 @@ describe('registerPtyHandlers', () => {
       expect(env.CODEX_HOME).toBe(TEST_CODEX_HOME)
       expect(env.ORCA_CODEX_HOME).toBe(TEST_CODEX_HOME)
       // Why: the app prepares a native pane's Codex home; only WSL panes run the preflight.
-      expect(env.ORCA_CODEX_LAUNCH_PREFLIGHT).toBeUndefined()
-    })
-    it('does not install the Codex launch preflight when Codex hooks are disabled', async () => {
-      const env = await spawnAndGetEnv(
-        undefined,
-        undefined,
-        () => TEST_CODEX_HOME,
-        () => ({ agentStatusHooksEnabled: true, disabledTuiAgents: ['codex'] })
-      )
-
-      expect(env.CODEX_HOME).toBe(TEST_CODEX_HOME)
       expect(env.ORCA_CODEX_LAUNCH_PREFLIGHT).toBeUndefined()
     })
     it('resumes an automatic Codex session from its prepared originating home', async () => {

@@ -72,8 +72,7 @@ function fixture() {
     claudeManagedAccounts: [account('a')],
     activeClaudeManagedAccountId: null,
     activeClaudeManagedAccountIdsByRuntime: { host: null, wsl },
-    agentStatusHooksEnabled: false,
-    disabledTuiAgents: []
+    agentStatusHooksEnabled: false
   }
   const setup = { calls: 0, fail: false, gate: Promise.resolve() }
   const router = new ClaudeWslProfileRouter({

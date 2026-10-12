@@ -5,7 +5,6 @@ type QuickSubmitSourcePreparationInput = Pick<
   | 'baseBranch'
   | 'branchNameOverride'
   | 'compareBaseRef'
-  | 'disabledTuiAgents'
   | 'effectiveLinkedPR'
   | 'decisions'
   | 'fallbackCreatureName'
@@ -18,7 +17,6 @@ type QuickSubmitSourcePreparationInput = Pick<
 >
 
 import { useCallback } from 'react'
-import { isTuiAgentEnabled } from '../../../../shared/tui-agent-selection'
 import { getLinkedWorkItemWorkspaceName } from '@/lib/new-workspace'
 import type { TuiAgent } from '../../../../shared/tui-agent'
 import type { PendingSmartGitHubSubmitResolution } from './source-selection-decisions'
@@ -28,7 +26,6 @@ export function useQuickSubmitSourcePreparation(input: QuickSubmitSourcePreparat
     baseBranch,
     branchNameOverride,
     compareBaseRef,
-    disabledTuiAgents,
     effectiveLinkedPR,
     decisions,
     fallbackCreatureName,
@@ -52,10 +49,7 @@ export function useQuickSubmitSourcePreparation(input: QuickSubmitSourcePreparat
           ? linkedWorkItem
           : smartGitHubResolution.linkedWorkItem
 
-      const agent =
-        requestedAgent && isTuiAgentEnabled(requestedAgent, disabledTuiAgents)
-          ? requestedAgent
-          : null
+      const agent = requestedAgent
 
       const submitLinkedIssueNumber =
         smartGitHubResolution.kind === 'none'
@@ -152,7 +146,6 @@ export function useQuickSubmitSourcePreparation(input: QuickSubmitSourcePreparat
     [
       baseBranch,
       branchNameOverride,
-      disabledTuiAgents,
       effectiveLinkedPR,
       fallbackCreatureName,
       linkedGitLabMR,

@@ -48,8 +48,7 @@ function coveredAccount() {
     claudeManagedAccounts: [account],
     activeClaudeManagedAccountId: 'a',
     activeClaudeManagedAccountIdsByRuntime: undefined,
-    agentStatusHooksEnabled: false,
-    disabledTuiAgents: []
+    agentStatusHooksEnabled: false
   }
   const router = new ClaudeProfileRouter({
     getSettings: () => settings,

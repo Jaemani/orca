@@ -258,7 +258,6 @@ export async function prepareRuntimePtySpawn(
         isWsl: shouldSkipCodexHomeEnvForWindowsShell(ctx.daemonShellOverride, ctx.cwd),
         wslDistro: ctx.codexSelectionTarget.runtime === 'wsl' ? ctx.expectedWslDistro : null,
         agentStatusHooksEnabled: isAgentStatusHooksEnabled(ptySettings),
-        disabledTuiAgents: ptySettings?.disabledTuiAgents,
         networkProxySettings: ptySettings,
         routeBrowserOpensToClient: ctx.deps.runtime?.shouldRelayTerminalBrowserOpens?.(),
         deferGitConfigGuardToDaemon:

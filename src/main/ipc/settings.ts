@@ -12,7 +12,7 @@ import { SETTINGS_CHANGED_WHITELIST, type SettingsChangedKey } from '../../share
 import type { AgentAwakeService } from '../agent-awake-service'
 import { sanitizeFloatingWorkspaceDirectorySetting } from './floating-workspace-directory'
 import { applyAgentStatusHooksEnabled } from '../agent-hooks/managed-agent-hook-controls'
-import { isAgentStatusHooksEnabledForAgent } from '../../shared/agent-status-hooks-setting'
+import { isAgentStatusHooksEnabled } from '../../shared/agent-status-hooks-setting'
 import { recordManagedHookInstallFailure } from '../agent-hooks/install-telemetry'
 import { applyElectronProxySettings } from '../network/proxy-settings'
 import { applyBrowserSessionProxies } from '../browser/browser-session-proxy'
@@ -29,7 +29,6 @@ import { scheduleCurrentWorktreeBaseDirectoryWatcherSync } from './worktree-base
 import { applyPRBotAuthorOverride } from '../../shared/pr-bot-author-overrides'
 import { resolveEnvironment } from '../../shared/runtime-environment-store'
 import { readSettingsWithRuntimeEnvironmentPreference } from './runtime-environment-preference'
-import { haveSameDisabledTuiAgents } from '../../shared/tui-agent-selection'
 import {
   normalizeMobilePairingCustomAddress,
   normalizeMobilePairingCustomAddresses
@@ -238,17 +237,15 @@ export function registerSettingsHandlers(
       )
     }
     const hookSettingChanged =
-      ('agentStatusHooksEnabled' in sanitizedArgs &&
-        before.agentStatusHooksEnabled !== result.agentStatusHooksEnabled) ||
-      ('disabledTuiAgents' in sanitizedArgs &&
-        !haveSameDisabledTuiAgents(before.disabledTuiAgents, result.disabledTuiAgents))
+      'agentStatusHooksEnabled' in sanitizedArgs &&
+      before.agentStatusHooksEnabled !== result.agentStatusHooksEnabled
     if (hookSettingChanged) {
       try {
         await applyAgentStatusHooksEnabled(result.agentStatusHooksEnabled, result, {
           userInitiated: true,
           shouldHydrateShellPath: app.isPackaged,
           onInstallError: recordManagedHookInstallFailure,
-          shouldContinue: (agent) => isAgentStatusHooksEnabledForAgent(store.getSettings(), agent)
+          shouldContinue: () => isAgentStatusHooksEnabled(store.getSettings())
         })
       } catch (error) {
         console.warn('[settings] failed to reconcile managed agent hooks:', error)

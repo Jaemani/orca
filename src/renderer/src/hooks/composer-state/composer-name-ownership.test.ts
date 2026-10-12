@@ -78,7 +78,6 @@ function useNameOwnership(draft?: { name: string; linkedWorkItem: LinkedWorkItem
     ...common,
     baseBranch: 'main',
     compareBaseRef: undefined,
-    disabledTuiAgents: [],
     effectiveLinkedPR: null,
     decisions,
     fallbackCreatureName: 'otter',

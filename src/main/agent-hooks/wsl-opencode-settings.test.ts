@@ -2,7 +2,6 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import type { TuiAgent } from '../../shared/tui-agent'
 import { RelayDispatcher } from '../../wsl-guest/dispatcher'
 import { PluginOverlayManager } from '../../wsl-guest/plugin-overlay'
 import { createInstallPluginsHandler } from '../../wsl-guest/wsl-install-plugins-handler'
@@ -19,7 +18,7 @@ let home: string
 let dispatcher: RelayDispatcher
 let mux: SshChannelMultiplexer
 let state: WslRelayDistroState
-let settings: { disabledTuiAgents: TuiAgent[] }
+let settings: { agentStatusHooksEnabled: boolean }
 let params: Record<string, unknown>[]
 const sources = {
   opencodePluginSource: '// v1',
@@ -40,7 +39,7 @@ beforeEach(() => {
   const xdg = join(home, 'xdg')
   mkdirSync(join(xdg, 'opencode'), { recursive: true })
   writeFileSync(join(xdg, 'opencode', 'opencode.json'), '{"model":"guest-fixture"}')
-  settings = { disabledTuiAgents: [] }
+  settings = { agentStatusHooksEnabled: true }
   params = []
   const callbacks: ((data: Buffer) => void)[] = []
   dispatcher = new RelayDispatcher((data) => {
@@ -84,30 +83,23 @@ afterEach(() => {
 })
 
 describe('WSL settings over the existing plugin RPC into real fixture overlays', () => {
-  const cases: TuiAgent[][] = [[], ['opencode'], ['opencode2'], ['opencode', 'opencode2']]
-  it.each(cases.map((disabled) => ({ disabled })))(
-    'honors disabled $disabled',
-    async ({ disabled }) => {
-      settings.disabledTuiAgents = disabled
-      const result = await requestGuestOpenCodeOverlayDir(mux, deps, 'fixture')
-      for (const agent of ['opencode', 'opencode2'] as const) {
-        const key = agent === 'opencode' ? 'opencodePluginSource' : 'opencode2PluginSource'
-        expect(params[0][key]).toBe(disabled.includes(agent) ? '' : sources[key])
+  it.each([true, false])('honors agentStatusHooksEnabled %s', async (enabled) => {
+    settings.agentStatusHooksEnabled = enabled
+    const result = await requestGuestOpenCodeOverlayDir(mux, deps, 'fixture')
+    expect(params[0].opencodePluginSource).toBe(enabled ? sources.opencodePluginSource : '')
+    expect(params[0].opencode2PluginSource).toBe(enabled ? sources.opencode2PluginSource : '')
+    if (result.kind === 'dir') {
+      expect(enabled).toBe(true)
+      const dir = result.dir ?? result.dir2
+      if (!dir) {
+        throw new Error('missing overlay')
       }
-      if (result.kind === 'dir') {
-        expect(Boolean(result.dir)).toBe(!disabled.includes('opencode'))
-        expect(Boolean(result.dir2)).toBe(!disabled.includes('opencode2'))
-        const dir = result.dir ?? result.dir2
-        if (!dir) {
-          throw new Error('missing overlay')
-        }
-        expect(readFileSync(join(dir, 'opencode.json'), 'utf8')).toBe('{"model":"guest-fixture"}')
-      } else {
-        expect(disabled).toEqual(['opencode', 'opencode2'])
-      }
-      expect(params[0].piExtensionSource).toBe('// pi')
+      expect(readFileSync(join(dir, 'opencode.json'), 'utf8')).toBe('{"model":"guest-fixture"}')
+    } else {
+      expect(enabled).toBe(false)
     }
-  )
+    expect(params[0].piExtensionSource).toBe('// pi')
+  })
 
   it('revokes cached sources before the reinstall interval and re-enables the same service', async () => {
     await runWslRelayGuestInstall(deps, state, mux, home)
@@ -117,10 +109,9 @@ describe('WSL settings over the existing plugin RPC into real fixture overlays',
     }
     const path = join(dir, 'plugins', 'orca-opencode-status.js')
     writeFileSync(path, '// installed sentinel')
-    settings.disabledTuiAgents = ['opencode']
+    settings.agentStatusHooksEnabled = false
     await maybeRerunWslRelayGuestInstall(deps, state)
     expect(state.opencodeOverlayDir).toBeUndefined()
-    expect(state.opencode2OverlayDir).toBeTruthy()
     expect(readFileSync(path, 'utf8')).toBe('// installed sentinel')
     const omitted = await requestGuestOpenCodeOverlayDir(
       mux,
@@ -128,7 +119,7 @@ describe('WSL settings over the existing plugin RPC into real fixture overlays',
       'fixture'
     )
     expect(omitted.kind === 'dir' ? omitted.dir : undefined).toBeUndefined()
-    settings.disabledTuiAgents = []
+    settings.agentStatusHooksEnabled = true
     await maybeRerunWslRelayGuestInstall(deps, state)
     expect(state.opencodeOverlayDir).toBe(dir)
     expect(existsSync(path)).toBe(true)

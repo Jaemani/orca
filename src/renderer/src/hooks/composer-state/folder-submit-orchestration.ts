@@ -5,7 +5,6 @@ type FolderSubmitOrchestrationInput = Pick<
   | 'clearNewWorkspaceDraft'
   | 'createFolderWorkspace'
   | 'decisions'
-  | 'disabledTuiAgents'
   | 'folderCreateDisabled'
   | 'folderSourceRepos'
   | 'folderTargetIsRemote'
@@ -29,7 +28,6 @@ type FolderSubmitOrchestrationInput = Pick<
 import { useCallback } from 'react'
 import type { TuiAgent } from '../../../../shared/tui-agent'
 import { settleComposerSubmit } from '@/lib/composer-submit-cancellation'
-import { isTuiAgentEnabled } from '../../../../shared/tui-agent-selection'
 import { submitFolderWorkspaceCreate } from '@/components/sidebar/folder-workspace-composer-submit'
 import {
   resolveTuiAgentLaunchArgs,
@@ -47,7 +45,6 @@ export function useFolderSubmitOrchestration(input: FolderSubmitOrchestrationInp
     clearNewWorkspaceDraft,
     createFolderWorkspace,
     decisions,
-    disabledTuiAgents,
     folderCreateDisabled,
     folderSourceRepos,
     folderTargetIsRemote,
@@ -93,10 +90,7 @@ export function useFolderSubmitOrchestration(input: FolderSubmitOrchestrationInp
         const smartGitHubMetadata =
           smartGitHubResolution.kind === 'none' ? null : smartGitHubResolution
         const submitLinkedWorkItem = smartGitHubMetadata?.linkedWorkItem ?? linkedWorkItem
-        const agent =
-          requestedAgent && isTuiAgentEnabled(requestedAgent, disabledTuiAgents)
-            ? requestedAgent
-            : null
+        const agent = requestedAgent
         if (isSubmissionCancelled()) {
           return
         }
@@ -158,7 +152,6 @@ export function useFolderSubmitOrchestration(input: FolderSubmitOrchestrationInp
       clearNewWorkspaceDraft,
       createFolderWorkspace,
       canResolveFolderSmartGitHubSubmit,
-      disabledTuiAgents,
       folderCreateDisabled,
       folderTargetIsRemote,
       folderTargetRuntimeEnvironmentId,

@@ -207,36 +207,19 @@ describe('managed agent hook controls', () => {
     ])
   })
 
-  it('removes disabled agents without probing or reinstalling them', async () => {
-    mocks.detect.mockResolvedValue({ codex: { state: 'found' } })
+  it('installs hooks for an agent hidden from pickers', async () => {
+    mocks.detect.mockResolvedValue({ claude: { state: 'found' }, codex: { state: 'found' } })
+    // Why a variable: the hidden list is no longer part of the hook settings type, yet must be ignored.
+    const settings = { agentCmdOverrides: {}, disabledTuiAgents: ['claude'] }
 
-    const results = await applyAgentStatusHooksEnabled(true, {
-      agentCmdOverrides: {},
-      disabledTuiAgents: ['claude']
-    })
+    const results = await applyAgentStatusHooksEnabled(true, settings)
 
-    expect(mocks.removeClaude).toHaveBeenCalledTimes(1)
-    expect(mocks.installClaude).not.toHaveBeenCalled()
-    expect(mocks.installCodex).toHaveBeenCalledTimes(1)
+    expect(mocks.removeClaude).not.toHaveBeenCalled()
+    expect(mocks.installClaude).toHaveBeenCalledTimes(1)
     expect(results).toEqual([
-      expect.objectContaining({ agent: 'claude', state: 'not_installed' }),
+      expect.objectContaining({ agent: 'claude', state: 'installed' }),
       expect.objectContaining({ agent: 'codex', state: 'installed' })
     ])
-  })
-
-  it('does not install an agent disabled while detection was running', async () => {
-    mocks.detect.mockResolvedValue({
-      claude: { state: 'found' },
-      codex: { state: 'found' }
-    })
-
-    await installManagedAgentHooks(
-      { agentCmdOverrides: {} },
-      { shouldContinue: (agent) => agent !== 'claude' }
-    )
-
-    expect(mocks.installClaude).not.toHaveBeenCalled()
-    expect(mocks.installCodex).toHaveBeenCalledTimes(1)
   })
 
   it('does not finish a startup install after shutdown begins', async () => {
@@ -247,11 +230,11 @@ describe('managed agent hook controls', () => {
           releaseDetection = resolve
         })
     )
-    const settings = { agentStatusHooksEnabled: true, disabledTuiAgents: [] }
+    const settings = { agentStatusHooksEnabled: true }
     let isQuitting = false
 
     const install = installManagedAgentHooks(settings, {
-      shouldContinue: (agent) => shouldContinueManagedHookStartup(isQuitting, settings, agent)
+      shouldContinue: () => shouldContinueManagedHookStartup(isQuitting, settings)
     })
     await vi.waitFor(() => expect(mocks.detect).toHaveBeenCalledTimes(1))
     isQuitting = true
@@ -260,21 +243,6 @@ describe('managed agent hook controls', () => {
 
     expect(mocks.installClaude).not.toHaveBeenCalled()
     expect(mocks.installCodex).not.toHaveBeenCalled()
-  })
-
-  it('does not remove an agent enabled by a newer settings update', async () => {
-    mocks.detect.mockResolvedValue({ codex: { state: 'found' } })
-
-    await applyAgentStatusHooksEnabled(
-      true,
-      {
-        agentCmdOverrides: {},
-        disabledTuiAgents: ['claude']
-      },
-      { shouldContinue: () => true }
-    )
-
-    expect(mocks.removeClaude).not.toHaveBeenCalled()
   })
 
   it('removes every managed hook when the global setting is off', async () => {
@@ -309,22 +277,5 @@ describe('startup managed hook reconciliation (STA-5679)', () => {
     expect(resolveStartupManagedHookAction({ agentStatusHooksEnabled: true })).toBe('install')
     expect(resolveStartupManagedHookAction({})).toBe('install')
     expect(resolveStartupManagedHookAction(null)).toBe('install')
-  })
-
-  it('does not remove disabled agents during startup install reconciliation', async () => {
-    const settings = {
-      agentStatusHooksEnabled: true,
-      agentCmdOverrides: {},
-      disabledTuiAgents: ['claude' as const]
-    }
-    mocks.detect.mockResolvedValue({ codex: { state: 'found' } })
-
-    await installManagedAgentHooks(settings, {
-      shouldContinue: (agent) => shouldContinueManagedHookStartup(false, settings, agent)
-    })
-
-    expect(mocks.removeClaude).not.toHaveBeenCalled()
-    expect(mocks.installClaude).not.toHaveBeenCalled()
-    expect(mocks.installCodex).toHaveBeenCalledTimes(1)
   })
 })

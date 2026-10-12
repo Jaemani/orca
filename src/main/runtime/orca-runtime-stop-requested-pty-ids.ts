@@ -28,7 +28,7 @@ import { RuntimeManagedWorktreeQueries } from './runtime-managed-worktree-querie
 import { RuntimePtyForegroundAgent } from './runtime-pty-foreground-agent'
 import { OpenCodeRunLifetimeStatus } from './opencode-run-lifetime-status'
 import { readLocalPtyForegroundCommandLine } from './local-pty-foreground-command-line'
-import { isAgentStatusHooksEnabledForAgent } from '../../shared/agent-status-hooks-setting'
+import { isAgentStatusHooksEnabled } from '../../shared/agent-status-hooks-setting'
 import { RuntimeTerminalAgentStatusQuery } from './runtime-terminal-agent-status-query'
 import type { OrchestrationDb } from './orchestration/db'
 import { OrchestrationMailboxOwner } from './orchestration/mailbox-owner'
@@ -174,8 +174,7 @@ export class OrcaRuntimeWithStopRequestedPtyIds extends OrcaRuntimeWithRuntimeId
       // Why: SSH and WSL foregrounds live on another host or in the guest.
       return !!pty && !pty.connectionId && !pty.wslDistro && !this.wslDistroByPtyId.has(ptyId)
     },
-    isStatusEnabled: (agent) =>
-      isAgentStatusHooksEnabledForAgent(this.store?.getSettings?.(), agent),
+    isStatusEnabled: () => isAgentStatusHooksEnabled(this.store?.getSettings?.()),
     readForegroundProcessName: async (ptyId) => {
       const read = await this.ptyForegroundAgent.read(ptyId)
       return read?.available ? read.process : null

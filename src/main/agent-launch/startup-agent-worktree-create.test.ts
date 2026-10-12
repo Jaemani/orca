@@ -200,9 +200,7 @@ describe('createWorktreeWithStartupAgent', () => {
   })
 
   it('surfaces a create failure unchanged', async () => {
-    const failure = new Error(
-      'Selected agent is disabled. Choose an enabled agent before creating.'
-    )
+    const failure = new Error('Branch app already exists.')
     const { create } = harness({ createError: failure })
 
     await expect(create({ ...BASE, startupAgent: 'claude' })).rejects.toBe(failure)

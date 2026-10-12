@@ -282,7 +282,9 @@ function makePostRevealWorkerRecoveryHarness(
   }
 }
 
-function makePendingAgentTabActivationRuntime(opts: { disabledTuiAgents?: string[] } = {}): {
+function makePendingAgentTabActivationRuntime(
+  opts: { agentDefaultArgs?: Record<string, string> } = {}
+): {
   runtime: RuntimeService
   spawn: ReturnType<typeof vi.fn>
 } {
@@ -309,11 +311,12 @@ function makePendingAgentTabActivationRuntime(opts: { disabledTuiAgents?: string
       }
     })
   )
+  // oxlint-disable-next-line typescript/consistent-type-assertions -- SAFETY: a complete test store with only getSettings replaced; the spread loses its declared type.
   const runtime = new OrcaRuntimeService({
     ...runtimeStore,
     getSettings: () => ({
       ...store.getSettings(),
-      disabledTuiAgents: opts.disabledTuiAgents ?? []
+      ...(opts.agentDefaultArgs ? { agentDefaultArgs: opts.agentDefaultArgs } : {})
     })
   } as never)
   runtime.setPtyController({

@@ -5534,7 +5534,7 @@
       "src/main/startup/cli-launch-redirect.test.ts": 114,
       "src/main/startup/codex-account-restart-resume.test.ts": 292,
       "src/main/startup/codex-hook-startup-wiring.test.ts": 6575,
-      "src/main/startup/codex-launch-per-agent-hook-opt-out.test.ts": 187,
+      "src/main/startup/codex-launch-hook-switch.test.ts": 187,
       "src/main/startup/codex-session-resume-daemon-guard.test.ts": 143,
       "src/main/startup/configure-process-dev-parent-shutdown.test.ts": 113,
       "src/main/startup/configure-process-profile-state.test.ts": 143,

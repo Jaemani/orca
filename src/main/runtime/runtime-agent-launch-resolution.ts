@@ -5,8 +5,11 @@ import type { SleepingAgentLaunchConfig } from '../../shared/agent-session-resum
 import type { ClaudeAgentTeamsMode } from '../../shared/claude-agent-teams-tmux-compat'
 import type { ProjectExecutionRuntimeResolution } from '../../shared/project-execution-runtime'
 import { isWindowsAbsolutePathLike } from '../../shared/cross-platform-path'
-import { getTuiAgentLaunchCommand, TUI_AGENT_CONFIG } from '../../shared/tui-agent-config'
-import { isTuiAgentEnabled } from '../../shared/tui-agent-selection'
+import {
+  getTuiAgentLaunchCommand,
+  isTuiAgent,
+  TUI_AGENT_CONFIG
+} from '../../shared/tui-agent-config'
 
 export function mergeTerminalEnvDeletionKeys(
   first: readonly string[] | undefined,
@@ -52,7 +55,6 @@ export function resolveBareAgentLaunchCommand(args: {
   command: string | undefined
   settings: {
     agentCmdOverrides?: Partial<Record<TuiAgent, string>> | null
-    disabledTuiAgents?: Iterable<unknown> | null
   }
   platform: NodeJS.Platform
   isRemote: boolean
@@ -63,23 +65,23 @@ export function resolveBareAgentLaunchCommand(args: {
   }
 
   const cmdOverrides = args.settings.agentCmdOverrides ?? {}
-  for (const agent of Object.keys(TUI_AGENT_CONFIG) as TuiAgent[]) {
-    if (!isTuiAgentEnabled(agent, args.settings.disabledTuiAgents)) {
-      continue
-    }
-    const override = cmdOverrides[agent]?.trim()
-    const defaultLaunchCommand = getTuiAgentLaunchCommand(TUI_AGENT_CONFIG[agent], args.platform, {
-      isRemote: args.isRemote
-    })
-    const launchCommands = override ? [defaultLaunchCommand, override] : [defaultLaunchCommand]
-    if (
-      launchCommands.some((candidate) => command === normalizeAgentLaunchCommandForMatch(candidate))
-    ) {
-      return agent
-    }
-  }
-
-  return null
+  const agents = Object.keys(TUI_AGENT_CONFIG).filter(isTuiAgent)
+  // `command` is non-empty, so an empty override never matches.
+  const matches = (candidate: string | undefined): boolean =>
+    candidate !== undefined && command === normalizeAgentLaunchCommandForMatch(candidate)
+  // Why overrides first: defaults are unique, so a collision is an override naming another agent's
+  // command, which says which agent the user means. Agents hidden in Settings match like any other.
+  return (
+    agents.find((agent) => matches(cmdOverrides[agent])) ??
+    agents.find((agent) =>
+      matches(
+        getTuiAgentLaunchCommand(TUI_AGENT_CONFIG[agent], args.platform, {
+          isRemote: args.isRemote
+        })
+      )
+    ) ??
+    null
+  )
 }
 
 export function inferCapturedClaudeAgentTeamsMode(

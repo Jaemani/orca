@@ -2,7 +2,6 @@ import type { SessionOptionValue } from '../../shared/native-chat-session-option
 import type { RuntimeStore } from './runtime-store-contract'
 import type { TerminalWorkspaceLaunchScope } from './runtime-legacy-worker-terminal-recovery-types'
 import type { TerminalCreateOptions } from './runtime-terminal-contracts'
-import { isTuiAgentEnabled } from '../../shared/tui-agent-selection'
 import { resolveBareAgentLaunchCommand } from './runtime-agent-launch-resolution'
 import { planExecutionHostStartupWithPromptCandidate } from '../opencode/opencode-model-startup-plan'
 import { agentPromptRidesLaunchCommand } from '../../shared/tui-agent-startup'
@@ -25,9 +24,6 @@ export async function buildRuntimeAgentTerminalStartupOptions(
   // Why: `workspace.repo` is display metadata and may be a row from another host; the launch
   // shape must match the PTY route this scope already resolved.
   const isRemote = Boolean(workspace.connectionId)
-  if (opts.startupAgent && !isTuiAgentEnabled(opts.startupAgent, settings.disabledTuiAgents)) {
-    throw new Error(`Agent ${opts.startupAgent} is disabled. Choose an enabled agent.`)
-  }
   const agent =
     opts.startupAgent ??
     resolveBareAgentLaunchCommand({

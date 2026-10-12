@@ -39,12 +39,16 @@ type StartupEnvironment = {
 }
 
 /** The agent a linked draft starts: the requested one, else the default, else one detected on the
- *  host that runs it. `null` means the draft starts no agent. */
+ *  host that runs it. `null` means the draft starts no agent. Only the automatic picks skip agents
+ *  hidden in Settings. */
 export async function resolveWorktreeStartupDraftAgent(
   environment: Pick<StartupEnvironment, 'repo' | 'settings'> & { requestedAgent?: TuiAgent }
 ): Promise<TuiAgent | null> {
   const { repo, settings } = environment
-  const preferredAgent = environment.requestedAgent ?? settings.defaultTuiAgent
+  if (environment.requestedAgent) {
+    return environment.requestedAgent
+  }
+  const preferredAgent = settings.defaultTuiAgent
   // Why: `blank` is an explicit shell-only preference, so linked drafts must not auto-pick an agent.
   if (preferredAgent === 'blank') {
     return null
@@ -148,9 +152,6 @@ export function buildWorktreeStartupForAgent(
   followup?: WorktreeStartupFollowup
 } {
   const { agent, repo, settings } = environment
-  if (!isTuiAgentEnabled(agent, settings.disabledTuiAgents)) {
-    throw new Error('Selected agent is disabled. Choose an enabled agent before creating.')
-  }
   const planInputs = resolveAgentStartupPlanInputs({
     agent,
     settings,

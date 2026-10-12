@@ -278,8 +278,7 @@ describe('OrcaRuntimeService', () => {
     electronMocks.app.isPackaged = true
     let settings = {
       ...store.getSettings(),
-      agentStatusHooksEnabled: true,
-      disabledTuiAgents: ['codex', 'claude']
+      agentStatusHooksEnabled: true
     }
     const updateSettings = vi.fn((updates: Partial<typeof settings>) => {
       settings = { ...settings, ...updates }
@@ -291,14 +290,14 @@ describe('OrcaRuntimeService', () => {
       updateSettings
     } as never)
 
-    await runtime.updateClientSettings({ disabledTuiAgents: ['claude', 'codex'] })
+    await runtime.updateClientSettings({ agentStatusHooksEnabled: true })
     expect(applyAgentStatusHooksEnabledMock).not.toHaveBeenCalled()
 
-    await runtime.updateClientSettings({ disabledTuiAgents: ['claude'] })
+    await runtime.updateClientSettings({ agentStatusHooksEnabled: false })
     expect(applyAgentStatusHooksEnabledMock).toHaveBeenCalledOnce()
     expect(applyAgentStatusHooksEnabledMock).toHaveBeenCalledWith(
-      true,
-      expect.objectContaining({ disabledTuiAgents: ['claude'] }),
+      false,
+      expect.objectContaining({ agentStatusHooksEnabled: false }),
       expect.objectContaining({
         shouldContinue: expect.any(Function),
         shouldHydrateShellPath: true
@@ -309,8 +308,7 @@ describe('OrcaRuntimeService', () => {
   it('serializes paired-client hook reconciliation and reads current settings', async () => {
     let settings = {
       ...store.getSettings(),
-      agentStatusHooksEnabled: true,
-      disabledTuiAgents: ['codex', 'claude']
+      agentStatusHooksEnabled: true
     }
     const updateSettings = vi.fn((updates: Partial<typeof settings>) => {
       settings = { ...settings, ...updates }
@@ -326,9 +324,9 @@ describe('OrcaRuntimeService', () => {
       updateSettings
     } as never)
 
-    const first = runtime.updateClientSettings({ disabledTuiAgents: ['claude'] })
+    const first = runtime.updateClientSettings({ agentStatusHooksEnabled: false })
     await vi.waitFor(() => expect(applyAgentStatusHooksEnabledMock).toHaveBeenCalledOnce())
-    const second = runtime.updateClientSettings({ disabledTuiAgents: [] })
+    const second = runtime.updateClientSettings({ agentStatusHooksEnabled: true })
 
     expect(applyAgentStatusHooksEnabledMock).toHaveBeenCalledOnce()
     const firstOptions = applyAgentStatusHooksEnabledMock.mock.calls[0]?.[2]
@@ -340,7 +338,7 @@ describe('OrcaRuntimeService', () => {
     expect(applyAgentStatusHooksEnabledMock).toHaveBeenCalledTimes(2)
     expect(applyAgentStatusHooksEnabledMock).toHaveBeenLastCalledWith(
       true,
-      expect.objectContaining({ disabledTuiAgents: [] }),
+      expect.objectContaining({ agentStatusHooksEnabled: true }),
       expect.objectContaining({ shouldContinue: expect.any(Function) })
     )
   })
