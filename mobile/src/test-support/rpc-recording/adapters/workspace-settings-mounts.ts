@@ -84,7 +84,10 @@ export function workspaceSettingsMounts(
         client: context.client,
         selectedRepo: { id: 'repo-1', displayName: 'Repo' },
         selectedAgent: { id: 'claude', label: 'Claude' },
+        // The user's own pick of an agent hidden in Settings, which create sends as chosen.
+        agentOverridden: true,
         runtimeSettings: { disabledTuiAgents: ['claude'] },
+        detectedAgentIds: new Set(['codex']),
         sshGate: { requiresConnection: false },
         composer: { name: 'recorded', createSelection: null, isNameAutoManaged: false },
         note: '',

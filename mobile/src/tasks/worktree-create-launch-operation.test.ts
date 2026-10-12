@@ -5,7 +5,11 @@ import type { RpcClient } from '../transport/rpc-client'
 import type { ConnectionState } from '../transport/types'
 import { LogicalClientCutoverError } from '../transport/stable-logical-rpc-client'
 import { WORKTREE_CREATE_DEDUPE_TTL_LEGACY_HOST_MS } from './worktree-create-idempotency-policy'
-import { createWorktreeWithNameRetry, type WorktreeCreateResult } from './worktree-create-retry'
+import {
+  createWorktreeWithNameRetry,
+  WORKSPACE_CREATE_UNCONFIRMED_MESSAGE,
+  type WorktreeCreateResult
+} from './worktree-create-retry'
 
 type Attempt = { method: string; params: Record<string, unknown> }
 
@@ -231,31 +235,37 @@ describe('agent.launch operation id', () => {
   })
 
   // These codes also describe a refused nested attach or an expired receipt after creation.
-  it.each([
-    'agent_session_operation_capacity',
-    'agent_session_operation_invalid',
-    'agent_session_operation_expired'
-  ])('preserves the operation identity when the host refuses with %s', async (code) => {
-    const attempts: Attempt[] = []
-    const client = scriptedLaunchClient([{ errorCode: code }, { launched: 'wt-unnamed' }], attempts)
-    await expect(launchRetry({ client, attempts })).resolves.toEqual({ error: code })
-    expect(attempts).toHaveLength(1)
-    expect(launchOperationIds(attempts)).toEqual(['op-1'])
-  })
+  it.each(['agent_session_operation_capacity', 'agent_session_operation_invalid'])(
+    'preserves the operation identity when the host refuses with %s',
+    async (code) => {
+      const attempts: Attempt[] = []
+      const client = scriptedLaunchClient(
+        [{ errorCode: code }, { launched: 'wt-unnamed' }],
+        attempts
+      )
+      await expect(launchRetry({ client, attempts })).resolves.toEqual({ error: code })
+      expect(attempts).toHaveLength(1)
+      expect(launchOperationIds(attempts)).toEqual(['op-1'])
+    }
+  )
 
-  // An unsettled claim is evidence that the launch may already have run.
-  it('surfaces an unknown operation without re-sending and without re-minting', async () => {
-    const attempts: Attempt[] = []
-    const client = scriptedLaunchClient(
-      [{ errorCode: 'agent_session_operation_unknown' }],
-      attempts
-    )
-    await expect(launchRetry({ client, attempts })).resolves.toEqual({
-      error: 'agent_session_operation_unknown'
-    })
-    expect(attempts).toHaveLength(1)
-    expect(launchOperationIds(attempts)).toEqual(['op-1'])
-  })
+  // An unsettled claim is evidence that the launch may already have run. An older host also answers
+  // this way when it refuses a hidden agent, so the user gets words rather than the code.
+  it.each(['agent_session_operation_unknown', 'agent_session_operation_expired'])(
+    'reports %s in plain words without re-sending and without re-minting',
+    async (code) => {
+      const attempts: Attempt[] = []
+      const client = scriptedLaunchClient(
+        [{ errorCode: code }, { launched: 'wt-unnamed' }],
+        attempts
+      )
+      await expect(launchRetry({ client, attempts })).resolves.toEqual({
+        error: WORKSPACE_CREATE_UNCONFIRMED_MESSAGE
+      })
+      expect(attempts).toHaveLength(1)
+      expect(launchOperationIds(attempts)).toEqual(['op-1'])
+    }
+  )
 
   // A conflict can only come from a client that reused one id across two payloads. Re-sending it
   // unnamed would hide that bug behind a create that quietly works.

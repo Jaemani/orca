@@ -203,7 +203,7 @@ describe('launchAgentWithPrompt', () => {
         id: 'x',
         ok: false,
         error: {
-          code: 'agent_launch_failed',
+          code: 'runtime_error',
           message: 'Agent claude is disabled. Choose an enabled agent.'
         },
         _meta: { runtimeId: 'r' }

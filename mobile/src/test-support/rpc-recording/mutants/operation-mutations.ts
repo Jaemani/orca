@@ -172,8 +172,8 @@ export const OPERATION_MUTATIONS = {
   // Publishes the settings envelope as the refreshed workspace runtime settings.
   'workspace-submit-envelope': {
     file: 'use-new-workspace-create-submit.ts',
-    before: 'args.setRuntimeSettings(settings.value as NewWorktreeRuntimeSettings)',
-    after: 'args.setRuntimeSettings(settingsReply.result as NewWorktreeRuntimeSettings)'
+    before: 'latestRuntimeSettings = settings.value as NewWorktreeRuntimeSettings',
+    after: 'latestRuntimeSettings = settingsReply.result as NewWorktreeRuntimeSettings'
   },
   // Reads settings eagerly, so a null result throws before the sibling's refusal is checked.
   'new-tab-deferred-settings-read': {

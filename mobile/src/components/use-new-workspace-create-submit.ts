@@ -17,9 +17,10 @@ import type { AgentLaunchSupport } from '../tasks/agent-launch-request'
 import type { WorkspaceSshGate } from '../tasks/workspace-ssh-gate'
 import type { useMobileComposerSource } from '../tasks/use-mobile-composer-source'
 import type { WorktreeCreateIdempotencySupport } from '../tasks/worktree-create-idempotency-policy'
-import type {
-  NewWorktreeAgentOption,
-  NewWorktreeRuntimeSettings
+import {
+  pickPreferredNewWorktreeAgent,
+  type NewWorktreeAgentOption,
+  type NewWorktreeRuntimeSettings
 } from './new-worktree-agent-selection'
 import type { MobileWorkspaceRepo, SetupRunPolicy } from './new-worktree-modal-types'
 import type { SetupTrustPrompt } from './SetupHookTrustDrawer'
@@ -37,8 +38,11 @@ export function useNewWorkspaceCreateSubmit(args: {
   client: RpcClient | null
   selectedRepo: MobileWorkspaceRepo | null
   selectedAgent: NewWorktreeAgentOption
+  /** True when the user picked `selectedAgent`; otherwise create re-picks from fresh Settings. */
+  agentOverridden: boolean
   runtimeSettings: NewWorktreeRuntimeSettings | null
   setRuntimeSettings: (settings: NewWorktreeRuntimeSettings) => void
+  detectedAgentIds: Set<string> | null
   sshGate: WorkspaceSshGate
   composer: Composer
   note: string
@@ -83,16 +87,22 @@ export function useNewWorkspaceCreateSubmit(args: {
         args.setError(`Connect ${selectedRepo.displayName} before creating a workspace.`)
         return
       }
+      let latestRuntimeSettings = args.runtimeSettings
       try {
         const settingsReply = await settingsRead.request(client)
         const settings = settingsRead.interpret(settingsReply)
         if (settings.accepted) {
           // oxlint-disable-next-line typescript/consistent-type-assertions -- SAFETY: Preserve the established response shape at this boundary.
-          args.setRuntimeSettings(settings.value as NewWorktreeRuntimeSettings)
+          latestRuntimeSettings = settings.value as NewWorktreeRuntimeSettings
+          args.setRuntimeSettings(latestRuntimeSettings)
         }
       } catch {
-        // Best-effort refresh, so the sheet shows the host's current agents if the create fails.
+        // Best-effort refresh; only the automatic pick below reads it.
       }
+      // A chosen agent starts even when hidden in Settings; hiding only skips it in the automatic pick.
+      const agent = args.agentOverridden
+        ? args.selectedAgent
+        : pickPreferredNewWorktreeAgent(latestRuntimeSettings, args.detectedAgentIds)
 
       const trimmedName = args.composer.name.trim()
       const baseName =
@@ -133,8 +143,7 @@ export function useNewWorkspaceCreateSubmit(args: {
         return
       }
 
-      const createdWithAgentId =
-        args.selectedAgent.id !== '__blank__' ? args.selectedAgent.id : undefined
+      const createdWithAgentId = agent.id !== '__blank__' ? agent.id : undefined
       const trimmedNote = args.note.trim() || undefined
       const selection = args.composer.createSelection
       const result = selection
@@ -143,7 +152,7 @@ export function useNewWorkspaceCreateSubmit(args: {
             selection,
             targetRepoId: selectedRepo.id,
             setupDecision,
-            agent: { choice: normalizeWorkspaceAgent(args.selectedAgent.id) ?? 'blank' },
+            agent: { choice: normalizeWorkspaceAgent(agent.id) ?? 'blank' },
             workspaceName: trimmedName || undefined,
             note: trimmedNote,
             nameIsAutoManaged: args.composer.isNameAutoManaged,

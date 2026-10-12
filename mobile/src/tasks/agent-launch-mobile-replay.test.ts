@@ -2,7 +2,10 @@ import { mkdtemp, rm } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { createWorktreeWithNameRetry } from './worktree-create-retry'
+import {
+  createWorktreeWithNameRetry,
+  WORKSPACE_CREATE_UNCONFIRMED_MESSAGE
+} from './worktree-create-retry'
 import type { RpcClient } from '../transport/rpc-client'
 import { markRpcDeliveryUnknown } from '../transport/rpc-delivery-ambiguity'
 import { LogicalClientCutoverError } from '../transport/stable-logical-rpc-client'
@@ -132,7 +135,7 @@ describe('mobile launch retries through the host ledger', () => {
     createStructuredSession.mockResolvedValue({ ok: false, refusal: { code, message: code } })
     const launch = mobileLaunch()
 
-    await expect(launch.result).resolves.toEqual({ error: 'agent_session_operation_unknown' })
+    await expect(launch.result).resolves.toEqual({ error: WORKSPACE_CREATE_UNCONFIRMED_MESSAGE })
     expect(launch.runtime.createManagedWorktree).toHaveBeenCalledTimes(1)
     expect(launch.attempts).toHaveLength(1)
     expect(store.listOperationRows()[0]?.outcome.status).toBe('unknown')
@@ -144,7 +147,7 @@ describe('mobile launch retries through the host ledger', () => {
         AGENT_SESSION_MAX_NEW_OPERATION_AGE_MS + AGENT_SESSION_OPERATION_FUTURE_SKEW_MS + 1
     })
 
-    await expect(launch.result).resolves.toEqual({ error: 'agent_session_operation_expired' })
+    await expect(launch.result).resolves.toEqual({ error: WORKSPACE_CREATE_UNCONFIRMED_MESSAGE })
     expect(launch.runtime.createManagedWorktree).toHaveBeenCalledTimes(1)
     expect(createStructuredSession).toHaveBeenCalledTimes(1)
     expect(launch.attempts).toHaveLength(2)

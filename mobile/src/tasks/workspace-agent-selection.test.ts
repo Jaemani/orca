@@ -80,6 +80,18 @@ describe('workspace agent selection', () => {
     ).toEqual({ agent: 'codex', overridden: true })
   })
 
+  it('preserves a user override that is hidden in Settings', () => {
+    expect(
+      resolveWorkspaceAgentSelection({
+        selectionActive: true,
+        settings: { defaultTuiAgent: 'claude', disabledTuiAgents: ['codex'] },
+        detectedAgentIds: new Set(['claude', 'codex']),
+        agent: 'codex',
+        overridden: true
+      })
+    ).toEqual({ agent: 'codex', overridden: true })
+  })
+
   it('falls back when a user override is unavailable after detection settles', () => {
     expect(
       resolveWorkspaceAgentSelection({

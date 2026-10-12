@@ -38,6 +38,7 @@ export function renderMobileTasksWorkspaceCreateDrawer(model: ConnectionPresenta
     showWorkspaceAdvanced,
     taskUiReady,
     workspaceAgentDetectionPending,
+    workspaceAgentOverridden,
     workspaceBaseBranch,
     workspaceBranchAutoName,
     workspaceBranchNameOverride,
@@ -253,7 +254,8 @@ export function renderMobileTasksWorkspaceCreateDrawer(model: ConnectionPresenta
                   workspaceCreateDraft.item,
                   workspaceCreateDraft.repoIdOverride,
                   undefined,
-                  resolvedWorkspaceAgent,
+                  // Only the user's own pick is sent; create re-picks from fresh Settings otherwise.
+                  workspaceAgentOverridden ? resolvedWorkspaceAgent : undefined,
                   workspaceNameDraft.trim(),
                   undefined,
                   workspaceBaseBranch?.refName,
