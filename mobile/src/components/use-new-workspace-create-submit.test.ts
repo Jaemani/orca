@@ -4,13 +4,21 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { EMPTY_RETIRED_NAME_REGISTRY } from '../../../src/shared/worktree/retired-name-registry'
 import type { RpcClient } from '../transport/rpc-client'
 import { newWorktreeAgentOptionFor } from './new-worktree-agent-selection'
-import { useNewWorkspaceCreateSubmit } from './use-new-workspace-create-submit'
+import {
+  hiddenAgentRefusedMessage,
+  useNewWorkspaceCreateSubmit
+} from './use-new-workspace-create-submit'
 
 type SubmitArgs = Parameters<typeof useNewWorkspaceCreateSubmit>[0]
 
 // The host has hidden Claude since the sheet read its settings, when Claude was the default.
 function hostClient() {
   const sendRequest = vi.fn(async (method: string, _params?: unknown) => {
+    if (method === 'agent.launchReplay') {
+      // A computer from before hidden agents could start refuses one with only this code.
+      const code = 'agent_session_operation_unknown'
+      return { id: 'x', ok: false, error: { code, message: code }, _meta: { runtimeId: 'r' } }
+    }
     const result =
       method === 'settings.get'
         ? { settings: { defaultTuiAgent: 'claude', disabledTuiAgents: ['claude'] } }
@@ -29,8 +37,12 @@ describe('useNewWorkspaceCreateSubmit agent', () => {
     renderer = null
   })
 
-  async function createWith(agentOverridden: boolean): Promise<unknown> {
+  async function createWith(
+    agentOverridden: boolean,
+    launchRoute = false
+  ): Promise<{ sent: unknown; error: string }> {
     const { client, sendRequest } = hostClient()
+    let error = ''
     const args: SubmitArgs = {
       client,
       selectedRepo: { id: 'repo-1', displayName: 'Repo', path: '/repo', kind: 'git' },
@@ -52,9 +64,11 @@ describe('useNewWorkspaceCreateSubmit agent', () => {
       trustedOrcaHooks: {},
       setTrustedOrcaHooks: () => {},
       getWorktreeCreateCutoverSupport: async () => false,
-      getAgentLaunchSupport: async () => false,
+      getAgentLaunchSupport: async () => (launchRoute ? { replay: true } : false),
       transitionDrawer: () => {},
-      setError: () => {},
+      setError: (message) => {
+        error = typeof message === 'function' ? message(error) : message
+      },
       onCreated: () => {},
       onClose: () => {}
     }
@@ -69,14 +83,19 @@ describe('useNewWorkspaceCreateSubmit agent', () => {
     await act(async () => {
       await submit!.create()
     })
-    return sendRequest.mock.calls.find(([method]) => method === 'worktree.create')?.[1]
+    const sent = sendRequest.mock.calls.find(([method]) => method === 'worktree.create')?.[1]
+    return { sent, error }
   }
 
   it('re-picks an automatic agent the host has since hidden', async () => {
-    await expect(createWith(false)).resolves.toMatchObject({ startupAgent: 'codex' })
+    expect((await createWith(false)).sent).toMatchObject({ startupAgent: 'codex' })
   })
 
   it('starts an agent the user picked even though it is hidden', async () => {
-    await expect(createWith(true)).resolves.toMatchObject({ startupAgent: 'claude' })
+    expect((await createWith(true)).sent).toMatchObject({ startupAgent: 'claude' })
+  })
+
+  it('names the hidden agent when an older computer refuses it with only a code', async () => {
+    expect((await createWith(true, true)).error).toBe(hiddenAgentRefusedMessage('Claude'))
   })
 })

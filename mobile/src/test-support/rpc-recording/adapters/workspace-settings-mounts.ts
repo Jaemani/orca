@@ -87,7 +87,7 @@ export function workspaceSettingsMounts(
         // The user's own pick of an agent hidden in Settings, which create sends as chosen.
         agentOverridden: true,
         runtimeSettings: { disabledTuiAgents: ['claude'] },
-        detectedAgentIds: new Set(['codex']),
+        detectedAgentIds: new Set(['claude', 'codex']),
         sshGate: { requiresConnection: false },
         composer: { name: 'recorded', createSelection: null, isNameAutoManaged: false },
         note: '',

@@ -27,6 +27,10 @@ import type { SetupTrustPrompt } from './SetupHookTrustDrawer'
 import type { NewWorktreeDrawerView } from './use-new-worktree-drawer-navigation'
 import { getSuggestedCreatureName } from './worktree-name-suggestion'
 
+export function hiddenAgentRefusedMessage(agentLabel: string): string {
+  return `Orca on your computer won't start ${agentLabel} while it's hidden in Settings there. Show ${agentLabel} in Settings on your computer, or pick another agent.`
+}
+
 type CreateOptions = {
   setupOverride?: Exclude<WorkspaceCreateSetupDecision, 'inherit'>
   approvedSetupContentHash?: string
@@ -171,7 +175,14 @@ export function useNewWorkspaceCreateSubmit(args: {
             agentLaunchSupported: args.getAgentLaunchSupport()
           })
       if ('error' in result) {
-        args.setError(result.error)
+        // Why: a computer from before hidden agents could start refuses one with only this code,
+        // having created nothing; the Settings read above say why.
+        const refusedAsHidden =
+          result.error === 'agent_session_operation_unknown' &&
+          args.agentOverridden &&
+          agent.id !== '__blank__' &&
+          latestRuntimeSettings?.disabledTuiAgents?.includes(agent.id) === true
+        args.setError(refusedAsHidden ? hiddenAgentRefusedMessage(agent.label) : result.error)
         return
       }
       args.onClose()

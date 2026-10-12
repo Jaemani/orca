@@ -19,7 +19,6 @@ import {
   readAgentLaunchCreateOutcome,
   type WorktreeCreateAgentLaunch
 } from './agent-launch-request'
-import { classifyAgentLaunchReplayRefusal } from '../../../src/shared/agent-launch-replay-refusal'
 import { structuredSessionOperationId } from '../session/structured-session-operation-id'
 import { WORKTREE_CREATE_TIMEOUT_MS } from './workspace-create-timeout'
 import type { WorkspaceCreateParams } from './workspace-create-params'
@@ -40,9 +39,6 @@ import {
 export type WorktreeCreateResult =
   | { worktreeId: string; name: string; warning?: string }
   | { error: string }
-
-export const WORKSPACE_CREATE_UNCONFIRMED_MESSAGE =
-  "Couldn't confirm the workspace was created. Check your workspaces before trying again."
 
 export type CreateWorktreeWithNameRetryArgs = {
   client: RpcClient
@@ -130,12 +126,7 @@ export async function createWorktreeWithNameRetry(
       lastError = 'Failed to create workspace'
       break
     }
-    // An unsettled launch answers with a bare code: the host itself can't say whether it created.
-    lastError =
-      launch?.replay &&
-      classifyAgentLaunchReplayRefusal(response.error, sent.replayed) === 'unknown'
-        ? WORKSPACE_CREATE_UNCONFIRMED_MESSAGE
-        : response.error.message
+    lastError = response.error.message
     // The replay-required host already exhausted its candidates; only legacy hosts need this loop.
     if (launch?.replay || !isRetryableWorktreeCreateConflict(lastError ?? '')) {
       break

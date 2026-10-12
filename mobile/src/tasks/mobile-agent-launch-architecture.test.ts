@@ -20,10 +20,7 @@ import { createStableLogicalRpcClient } from '../transport/stable-logical-rpc-cl
 import type { RpcClient } from '../transport/rpc-client'
 import type { RpcResponse } from '../transport/types'
 import { WorktreeCreateCollisionError } from '../../../src/shared/new-workspace/worktree-create-collision'
-import {
-  createWorktreeWithNameRetry,
-  WORKSPACE_CREATE_UNCONFIRMED_MESSAGE
-} from './worktree-create-retry'
+import { createWorktreeWithNameRetry } from './worktree-create-retry'
 import { readNewWorktreeRuntimeCapabilities } from './worktree-create-capability'
 import {
   AGENT_LAUNCH_RUNTIME_CAPABILITY,
@@ -259,8 +256,9 @@ describe('mobile launch retry authority', () => {
 
   it('does not duplicate when a replacement host strips operationId', async () => {
     const launch = scenario({ replacement: 'legacy' })
-    // The first send may have created the workspace, so the user is told to check, not "Unknown method".
-    await expect(launch.result).resolves.toEqual({ error: WORKSPACE_CREATE_UNCONFIRMED_MESSAGE })
+    await expect(launch.result).resolves.toMatchObject({
+      error: expect.stringContaining('Unknown method')
+    })
     expect(
       launch.runtime.createManagedWorktree.mock.calls.length +
         launch.replacement.createManagedWorktree.mock.calls.length
@@ -314,15 +312,16 @@ describe('mobile launch retry authority', () => {
       }
     })
     const launch = scenario()
-    await expect(launch.result).resolves.toEqual({ error: WORKSPACE_CREATE_UNCONFIRMED_MESSAGE })
+    await expect(launch.result).resolves.toEqual({ error: 'agent_session_operation_unknown' })
     expect(launch.runtime.createManagedWorktree).toHaveBeenCalledTimes(1)
     expect(createStructuredSession).toHaveBeenCalledTimes(1)
   })
 
   it('refuses an older receiver reached after a connected timeout', async () => {
     const launch = scenario({ replacement: 'legacy', loss: 'timeout' })
-    // The first send may have created the workspace, so the user is told to check, not "Unknown method".
-    await expect(launch.result).resolves.toEqual({ error: WORKSPACE_CREATE_UNCONFIRMED_MESSAGE })
+    await expect(launch.result).resolves.toMatchObject({
+      error: expect.stringContaining('Unknown method')
+    })
     expect(launch.runtime.createManagedWorktree).toHaveBeenCalledTimes(1)
     expect(launch.replacement.createManagedWorktree).not.toHaveBeenCalled()
   })
@@ -359,7 +358,7 @@ describe('mobile launch retry authority', () => {
       refusal: { code: 'agent_session_operation_unknown', message }
     })
     const launch = scenario()
-    await expect(launch.result).resolves.toEqual({ error: WORKSPACE_CREATE_UNCONFIRMED_MESSAGE })
+    await expect(launch.result).resolves.toEqual({ error: 'agent_session_operation_unknown' })
     expect(launch.runtime.createManagedWorktree).toHaveBeenCalledTimes(1)
     expect(createStructuredSession).toHaveBeenCalledTimes(1)
   })
