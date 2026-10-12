@@ -175,10 +175,12 @@ export function useNewWorkspaceCreateSubmit(args: {
             agentLaunchSupported: args.getAgentLaunchSupport()
           })
       if ('error' in result) {
-        // Why: a computer from before hidden agents could start refuses one with only this code,
-        // having created nothing; the Settings read above say why.
+        // Why: a computer from before hidden agents could start refuses one on the first send with
+        // only this code; the Settings read above say why. On a newer computer any failure on this
+        // route sends the same code, so a failed create for a hidden pick also lands here.
         const refusedAsHidden =
           result.error === 'agent_session_operation_unknown' &&
+          !result.replayed &&
           args.agentOverridden &&
           agent.id !== '__blank__' &&
           latestRuntimeSettings?.disabledTuiAgents?.includes(agent.id) === true

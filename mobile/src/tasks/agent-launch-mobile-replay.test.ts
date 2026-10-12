@@ -144,7 +144,10 @@ describe('mobile launch retries through the host ledger', () => {
         AGENT_SESSION_MAX_NEW_OPERATION_AGE_MS + AGENT_SESSION_OPERATION_FUTURE_SKEW_MS + 1
     })
 
-    await expect(launch.result).resolves.toEqual({ error: 'agent_session_operation_expired' })
+    await expect(launch.result).resolves.toEqual({
+      error: 'agent_session_operation_expired',
+      replayed: true
+    })
     expect(launch.runtime.createManagedWorktree).toHaveBeenCalledTimes(1)
     expect(createStructuredSession).toHaveBeenCalledTimes(1)
     expect(launch.attempts).toHaveLength(2)

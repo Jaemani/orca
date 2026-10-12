@@ -305,7 +305,8 @@ describe('agent.launch operation id', () => {
     )
 
     await expect(launchRetry({ client, attempts })).resolves.toEqual({
-      error: 'agent_launch_unsupported'
+      error: 'agent_launch_unsupported',
+      replayed: true
     })
     expect(attempts.map((attempt) => attempt.method)).toEqual([
       'agent.launchReplay',

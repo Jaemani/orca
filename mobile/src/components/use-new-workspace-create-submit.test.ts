@@ -25,7 +25,7 @@ function hostClient() {
         : { worktree: { id: 'wt-1', displayName: 'recorded' } }
     return { id: 'x', ok: true, result, _meta: { runtimeId: 'r' } }
   })
-  // oxlint-disable-next-line typescript/consistent-type-assertions -- SAFETY: a non-replaying create reaches only `sendRequest` on the client.
+  // oxlint-disable-next-line typescript/consistent-type-assertions -- SAFETY: every reply here is definite, so no create is resent and only `sendRequest` is reached.
   return { client: { sendRequest } as unknown as RpcClient, sendRequest }
 }
 
@@ -39,14 +39,15 @@ describe('useNewWorkspaceCreateSubmit agent', () => {
 
   async function createWith(
     agentOverridden: boolean,
-    launchRoute = false
+    launchRoute = false,
+    selected: 'claude' | 'codex' = 'claude'
   ): Promise<{ sent: unknown; error: string }> {
     const { client, sendRequest } = hostClient()
     let error = ''
     const args: SubmitArgs = {
       client,
       selectedRepo: { id: 'repo-1', displayName: 'Repo', path: '/repo', kind: 'git' },
-      selectedAgent: newWorktreeAgentOptionFor('claude'),
+      selectedAgent: newWorktreeAgentOptionFor(selected),
       agentOverridden,
       runtimeSettings: { defaultTuiAgent: 'claude', disabledTuiAgents: [] },
       setRuntimeSettings: () => {},
@@ -97,5 +98,14 @@ describe('useNewWorkspaceCreateSubmit agent', () => {
 
   it('names the hidden agent when an older computer refuses it with only a code', async () => {
     expect((await createWith(true, true)).error).toBe(hiddenAgentRefusedMessage('Claude'))
+  })
+
+  it.each([
+    ['an automatic pick', false, 'claude'],
+    ['a user pick that is shown in Settings', true, 'codex']
+  ] as const)('shows the code as on main for %s', async (_case, overridden, selected) => {
+    expect((await createWith(overridden, true, selected)).error).toBe(
+      'agent_session_operation_unknown'
+    )
   })
 })

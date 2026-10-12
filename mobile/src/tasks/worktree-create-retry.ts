@@ -38,7 +38,8 @@ import {
 // loop in src/renderer/src/store/slices/worktrees.ts.
 export type WorktreeCreateResult =
   | { worktreeId: string; name: string; warning?: string }
-  | { error: string }
+  /** `replayed`: the failing reply answered a resend, so an earlier send may have run. */
+  | { error: string; replayed?: true }
 
 export type CreateWorktreeWithNameRetryArgs = {
   client: RpcClient
@@ -75,6 +76,7 @@ export async function createWorktreeWithNameRetry(
   const mintMutationId = args.mintMutationId ?? defaultWorktreeCreateMutationId
   const mintLaunchOperationId = args.mintLaunchOperationId ?? structuredSessionOperationId
   let lastError: string | null = null
+  let lastReplayed = false
   for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
     const candidateName = args.nameWasGenerated
       ? getGeneratedWorktreeCreateRetryCandidate(baseName, attempt)
@@ -96,6 +98,7 @@ export async function createWorktreeWithNameRetry(
       worktreeCreateIdempotency
     )
     let response = sent.response
+    let replayed = sent.replayed
     if (
       !response.ok &&
       !sent.replayed &&
@@ -107,9 +110,15 @@ export async function createWorktreeWithNameRetry(
       // The probe said the host knows `agent.launch` but it refused the call — most likely this
       // client's capability list had not landed yet. Downgrade for good rather than fail a create.
       launch = null
-      response = (
-        await sendWorktreeCreateResilient(client, null, null, params, worktreeCreateIdempotency)
-      ).response
+      const fallback = await sendWorktreeCreateResilient(
+        client,
+        null,
+        null,
+        params,
+        worktreeCreateIdempotency
+      )
+      response = fallback.response
+      replayed = fallback.replayed
     }
     // Ledger refusals can follow workspace creation or an expired receipt; never retry unnamed.
     // Why the raw refusal: the retry decision below is `isRetryableWorktreeCreateConflict` over the
@@ -124,15 +133,20 @@ export async function createWorktreeWithNameRetry(
         }
       }
       lastError = 'Failed to create workspace'
+      lastReplayed = false
       break
     }
     lastError = response.error.message
+    lastReplayed = replayed
     // The replay-required host already exhausted its candidates; only legacy hosts need this loop.
     if (launch?.replay || !isRetryableWorktreeCreateConflict(lastError ?? '')) {
       break
     }
   }
-  return { error: lastError ?? 'Failed to create workspace' }
+  return {
+    error: lastError ?? 'Failed to create workspace',
+    ...(lastReplayed ? { replayed: true } : {})
+  }
 }
 
 async function resolveAgentLaunchRoute(
