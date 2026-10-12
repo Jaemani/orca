@@ -200,6 +200,8 @@ describe('SourceControlAgentActionDialog', () => {
     setLocalRuntimeCapabilitiesForTests(null)
   })
   it('hides the dialog and auto-starts once when the saved global launch recipe matches', async () => {
+    // Hiding the saved agent in Settings only removes it from the picker; it still auto-starts.
+    resetStore(settingsWithGlobalRecipe(undefined, ['codex']))
     renderControlledDialog()
     expect(container.textContent).not.toContain('Launch agent')
     await vi.waitFor(() => expect(mocks.onStart).toHaveBeenCalledTimes(1))
@@ -312,7 +314,9 @@ describe('SourceControlAgentActionDialog', () => {
     renderControlledDialog()
     expect(container.textContent).not.toContain('Launch agent')
     await vi.waitFor(() =>
-      expect(container.textContent?.toLowerCase()).toContain('not enabled or was not detected')
+      expect(container.textContent?.toLowerCase()).toContain(
+        'was not detected on this workspace host'
+      )
     )
     expect(mocks.onStart).not.toHaveBeenCalled()
     expect(container.textContent).toContain('Launch agent')

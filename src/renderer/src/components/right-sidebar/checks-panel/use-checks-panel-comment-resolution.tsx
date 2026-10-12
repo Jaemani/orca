@@ -2,6 +2,7 @@ import { forgeOwnerHostIdForWorkspace } from '@/runtime/forge-credential-target'
 import { useCallback, useEffect } from 'react'
 import { toast } from 'sonner'
 import { pickDefaultSourceControlAgent } from '../SourceControl'
+import { resolveSourceControlLaunchAgentScope } from '../../../../../shared/source-control-launch-agent-selection'
 import {
   markPRCommentThreadResolved,
   restorePRCommentThreadSnapshot
@@ -151,8 +152,20 @@ export function useChecksPanelCommentResolution(model: ChecksPanelCommentResolut
   const commentsDisabledReason = canTargetPRComments
     ? undefined
     : 'Commenting requires a GitHub PR repository target.'
+  // A saved action agent launches even when hidden from pickers, so it keeps the actions usable.
+  const savedAgentDetected = (['fixChecks', 'resolveConflicts', 'resolveComments'] as const).some(
+    (actionId) => {
+      const agent = resolveSourceControlLaunchAgentScope({
+        settings,
+        repo,
+        actionId
+      }).effectiveAgentId
+      return agent !== null && Boolean(detectedAgentIds?.includes(agent))
+    }
+  )
   const noEnabledAgentKnown =
     detectedAgentIds != null &&
+    !savedAgentDetected &&
     pickDefaultSourceControlAgent(
       settings?.defaultTuiAgent,
       detectedAgentIds,

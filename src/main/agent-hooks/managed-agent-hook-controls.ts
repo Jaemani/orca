@@ -26,7 +26,7 @@ type InstallOptions = {
   userInitiated?: boolean
   shouldHydrateShellPath?: boolean
   onInstallError?: (agent: AgentHookTarget, error: unknown) => void
-  shouldContinue?: (agent: AgentHookTarget) => boolean
+  shouldContinue?: () => boolean
   agents?: readonly AgentHookTarget[]
 }
 
@@ -147,7 +147,7 @@ export async function installManagedAgentHooks(
   const results: AgentHookInstallStatus[] = []
   for (const entry of installers) {
     const [agent] = entry
-    if (options.shouldContinue && !options.shouldContinue(agent)) {
+    if (options.shouldContinue && !options.shouldContinue()) {
       results.push(
         skippedStatus(
           agent,
@@ -182,15 +182,9 @@ export async function installManagedAgentHooks(
   return results
 }
 
-export async function removeManagedAgentHooks(
-  options: RemoveOptions = {}
-): Promise<AgentHookInstallStatus[]> {
-  const allowed = options.agents ? new Set(options.agents) : null
+export async function removeManagedAgentHooks(): Promise<AgentHookInstallStatus[]> {
   const results: AgentHookInstallStatus[] = []
   for (const [agent, remove] of MANAGED_AGENT_HOOK_REMOVERS) {
-    if (allowed !== null && !allowed.has(agent)) {
-      continue
-    }
     try {
       results.push(await remove())
     } catch (error) {

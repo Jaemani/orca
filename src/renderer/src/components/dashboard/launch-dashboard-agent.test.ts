@@ -10,8 +10,7 @@ const mocks = vi.hoisted(() => ({
 vi.mock('@/store', () => ({
   useAppStore: {
     getState: () => ({
-      // Hiding an agent only removes it from pickers; an explicit launch still starts it.
-      settings: { disabledTuiAgents: ['codex'] },
+      settings: null,
       getKnownWorktreeById: mocks.getKnownWorktreeById,
       setActiveWorktree: mocks.setActiveWorktree
     })

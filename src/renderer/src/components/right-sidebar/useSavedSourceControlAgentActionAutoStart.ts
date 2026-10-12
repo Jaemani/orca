@@ -6,7 +6,7 @@ import type {
 import type { GlobalSettings } from '../../../../shared/global-settings-types'
 import type { Repo } from '../../../../shared/repo-types'
 import type { TuiAgent } from '../../../../shared/tui-agent'
-import { isSourceControlAgentDetectedAndEnabled } from './source-control-agent-action-dialog-support'
+import { isSourceControlAgentDetected } from './source-control-agent-action-dialog-support'
 import { sourceControlActionRecipeMatchesTarget } from './source-control-action-recipe-match'
 
 type SavedSourceControlAgentActionTargetValue = 'repo' | 'global'
@@ -33,7 +33,6 @@ type UseSavedSourceControlAgentActionAutoStartArgs = {
   detecting: boolean
   isStarting: boolean
   detectedAgents: TuiAgent[]
-  disabledAgents: TuiAgent[] | undefined
   onAutoStart: (args: {
     detectedAgents: TuiAgent[]
     saveTargetValue: SavedSourceControlAgentActionTargetValue
@@ -147,7 +146,6 @@ export function useSavedSourceControlAgentActionAutoStart({
   detecting,
   isStarting,
   detectedAgents,
-  disabledAgents,
   onAutoStart
 }: UseSavedSourceControlAgentActionAutoStartArgs): SavedSourceControlAgentActionAutoStartResult {
   const autoStartedOpenCycleRef = useRef(0)
@@ -244,7 +242,7 @@ export function useSavedSourceControlAgentActionAutoStart({
       selectedAgent !== savedAgentId ||
       !trimmedCommandInput ||
       connectionUnavailable ||
-      !isSourceControlAgentDetectedAndEnabled(savedAgentId, detectedAgents, disabledAgents)
+      !isSourceControlAgentDetected(savedAgentId, detectedAgents)
     ) {
       revealDialog()
       return
@@ -270,7 +268,6 @@ export function useSavedSourceControlAgentActionAutoStart({
     detectedAgents,
     detectionReady,
     detecting,
-    disabledAgents,
     isStarting,
     matchedSavedReceiptTargetValue,
     onAutoStart,

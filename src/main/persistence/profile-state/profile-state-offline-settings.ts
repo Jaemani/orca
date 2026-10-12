@@ -2,7 +2,6 @@ import { existsSync, readFileSync } from 'node:fs'
 import { homedir } from 'node:os'
 import type { GlobalSettings } from '../../../shared/global-settings-types'
 import { getDefaultPersistedState } from '../../../shared/constants'
-import { normalizeDisabledTuiAgents } from '../../../shared/tui-agent-selection'
 import { profileStateJsonMatchesAcceptance } from './profile-state-documents'
 import { isRecord, parseProfileStateRoot } from './profile-state-document-validation'
 import {
@@ -26,13 +25,10 @@ export type ProfileStateOfflineLocation = {
   profileId: string
 }
 
-export type AgentHookSettings = Pick<
-  GlobalSettings,
-  'agentStatusHooksEnabled' | 'disabledTuiAgents'
->
+export type AgentHookSettings = Pick<GlobalSettings, 'agentStatusHooksEnabled'>
 
 export type AgentHookSettingsUpdate = {
-  settings: Pick<GlobalSettings, 'agentCmdOverrides' | 'disabledTuiAgents'>
+  settings: Pick<GlobalSettings, 'agentCmdOverrides'>
   settingsPath: string
 }
 
@@ -139,10 +135,7 @@ function projectAgentHookSettings(
             ([, value]) => typeof value === 'string'
           )
         )
-      : {},
-    disabledTuiAgents: Array.isArray(settings.disabledTuiAgents)
-      ? settings.disabledTuiAgents.filter((value) => typeof value === 'string')
-      : []
+      : {}
   }
 }
 
@@ -186,7 +179,6 @@ function readAgentHookSettingsFromJson(dataFile: string): AgentHookSettings {
 function readAgentHookSettingsFromSettingsValue(value: unknown): AgentHookSettings {
   const settings = isRecord(value) ? value : {}
   return {
-    agentStatusHooksEnabled: settings.agentStatusHooksEnabled !== false,
-    disabledTuiAgents: normalizeDisabledTuiAgents(settings.disabledTuiAgents)
+    agentStatusHooksEnabled: settings.agentStatusHooksEnabled !== false
   }
 }

@@ -56,10 +56,7 @@ describe.each(['json', 'sqlite'] as const)('offline settings %s updates', (backe
 
       expect(updateAgentHookSettingsFromProfileState(location, false)).toEqual({
         settingsPath: location.databaseFile,
-        settings: {
-          agentCmdOverrides: { claude: 'claude --model opus' },
-          disabledTuiAgents: ['codex', 'future-agent', 'codex']
-        }
+        settings: { agentCmdOverrides: { claude: 'claude --model opus' } }
       })
       const persisted = authority.readSerializedState()
       expect(hasProfileStateAuthorityMarker(location.databaseFile)).toBe(true)

@@ -49,7 +49,7 @@ export function applyOpenCodeStatusPluginEnv(
   const agent = selectOpenCodeHookAgent(
     options.launchAgent,
     command,
-    () => options.agentStatusHooksEnabled
+    options.agentStatusHooksEnabled
   )
   restoreOrStripOverlayEnv(
     env,

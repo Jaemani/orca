@@ -4,9 +4,23 @@ import type { GlobalSettings } from './global-settings-types'
 import type { Repo } from './repo-types'
 import type { TuiAgent } from './tui-agent'
 import {
+  pickSourceControlLaunchAgent,
   resolveSourceControlLaunchAgentScope,
   summarizeReposOverridingActionRecipe
 } from './source-control-launch-agent-selection'
+
+describe('pickSourceControlLaunchAgent', () => {
+  it('keeps a detected saved agent that is hidden from pickers', () => {
+    expect(
+      pickSourceControlLaunchAgent({
+        savedAgent: 'codex',
+        defaultAgent: 'claude',
+        detectedAgents: ['claude', 'codex'],
+        disabledAgents: ['codex']
+      })
+    ).toBe('codex')
+  })
+})
 
 function settingsWithGlobalResolveAgent(agentId: TuiAgent): GlobalSettings {
   const base = getDefaultSettings('/tmp')

@@ -15,17 +15,17 @@ export function isOpenCode2LaunchCommand(launchCommand: string | undefined): boo
 export function selectOpenCodeHookAgent(
   launchAgent: TuiAgent | undefined,
   launchCommand: string | undefined,
-  isEnabled: (agent: 'opencode' | 'opencode2') => boolean
+  hooksEnabled: boolean
 ): 'opencode' | 'opencode2' | null {
+  if (!hooksEnabled) {
+    return null
+  }
   const explicit =
     launchAgent === 'opencode' || launchAgent === 'opencode2'
       ? launchAgent
       : launchAgent === undefined
         ? openCodeCommandAgent(launchCommand)
         : null
-  // An explicit version selects its own integration; disabling it never substitutes the other.
-  if (explicit) {
-    return isEnabled(explicit) ? explicit : null
-  }
-  return isEnabled('opencode') ? 'opencode' : isEnabled('opencode2') ? 'opencode2' : null
+  // An explicit version selects its own integration.
+  return explicit ?? 'opencode'
 }

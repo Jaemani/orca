@@ -19,13 +19,14 @@ describe('OpenCode hook selection', () => {
     'opencode --session fixture',
     '"C:\\tools\\opencode.exe" --session fixture',
     '/usr/local/bin/opencode'
-  ])('preserves disabled v1 identity for %s', (command) => {
-    expect(selectOpenCodeHookAgent(undefined, command, (agent) => agent === 'opencode2')).toBeNull()
+  ])('reads the v1 identity from %s', (command) => {
+    expect(selectOpenCodeHookAgent(undefined, command, true)).toBe('opencode')
+  })
+  it('selects nothing when status hooks are off', () => {
+    expect(selectOpenCodeHookAgent('opencode2', 'opencode2', false)).toBeNull()
   })
   it('trusts the supplied identity for wrapped or renamed commands', () => {
-    expect(selectOpenCodeHookAgent('opencode', 'opencode2', () => true)).toBe('opencode')
-    expect(
-      selectOpenCodeHookAgent('opencode2', 'my-wrapper', (agent) => agent === 'opencode2')
-    ).toBe('opencode2')
+    expect(selectOpenCodeHookAgent('opencode', 'opencode2', true)).toBe('opencode')
+    expect(selectOpenCodeHookAgent('opencode2', 'my-wrapper', true)).toBe('opencode2')
   })
 })

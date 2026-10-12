@@ -20,7 +20,7 @@ import {
   buildSourceControlAgentSaveTargets,
   buildSourceControlAgentScopeNote,
   buildSourceControlAgentStatusCopy,
-  isSourceControlAgentDetectedAndEnabled
+  isSourceControlAgentDetected
 } from './source-control-agent-action-dialog-support'
 import { useSourceControlAgentActionStart } from './useSourceControlAgentActionStart'
 
@@ -166,8 +166,7 @@ export function useSourceControlAgentActionDialog({
     [enabledDetectedAgents, selectedAgent]
   )
   const selectedAgentUnavailable = Boolean(
-    selectedAgent &&
-    !isSourceControlAgentDetectedAndEnabled(selectedAgent, detectedAgents, disabledAgents)
+    selectedAgent && !isSourceControlAgentDetected(selectedAgent, detectedAgents)
   )
   const hasEnabledAgents = enabledDetectedAgents.length > 0
   const commandInput = renderSourceControlActionCommandTemplate(commandTemplate, {
@@ -257,7 +256,6 @@ export function useSourceControlAgentActionDialog({
     detecting,
     isStarting,
     detectedAgents,
-    disabledAgents,
     onAutoStart: ({ detectedAgents: agentsForLaunch, saveTargetValue: matchedTargetValue }) =>
       startWithDetectedAgents({
         detectedAgents: agentsForLaunch,

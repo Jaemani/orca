@@ -1,19 +1,16 @@
 import { getAgentCatalog } from '@/lib/agent-catalog'
-import { isTuiAgentEnabled } from '../../../../shared/tui-agent-selection'
 import type { TuiAgent } from '../../../../shared/tui-agent'
 import type { SourceControlAiWriteTarget } from '../../../../shared/source-control-ai-recipe-save'
 import { translate } from '@/i18n/i18n'
 import type { SourceControlAgentActionDeliveryPlanState } from './SourceControlAgentActionDialogForm'
 import type { SourceControlAgentScopeNote } from './source-control-agent-action-dialog-result'
 
-export function isSourceControlAgentDetectedAndEnabled(
+// Hiding an agent in Settings only removes it from the picker; a saved or chosen agent still runs.
+export function isSourceControlAgentDetected(
   agent: TuiAgent | null,
-  detectedAgents: TuiAgent[],
-  disabledAgents: TuiAgent[] | undefined
+  detectedAgents: TuiAgent[]
 ): boolean {
-  return Boolean(
-    agent && detectedAgents.includes(agent) && isTuiAgentEnabled(agent, disabledAgents)
-  )
+  return Boolean(agent && detectedAgents.includes(agent))
 }
 
 export function buildSourceControlAgentSaveTargets(repoId?: string | null): {
@@ -90,7 +87,7 @@ export function buildSourceControlAgentStatusCopy(args: {
     detecting
   } = args
   if (selectedAgentUnavailable) {
-    return `${getAgentCatalog().find((entry) => entry.id === selectedAgent)?.label ?? selectedAgent} is not enabled or was not detected on this workspace host.`
+    return `${getAgentCatalog().find((entry) => entry.id === selectedAgent)?.label ?? selectedAgent} was not detected on this workspace host.`
   }
   if (connectionUnavailable) {
     return 'Unable to resolve the workspace connection.'
