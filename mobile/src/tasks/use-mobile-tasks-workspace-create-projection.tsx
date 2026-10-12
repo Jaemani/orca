@@ -8,7 +8,6 @@ import {
   type WorkspaceAgentChoice,
   deriveWorkspaceSshGate,
   filterWorkspaceAgents,
-  isWorkspaceAgentEnabled,
   parseSparsePresetDirectories,
   resolveComposerBranchSelection,
   useCallback,
@@ -145,10 +144,10 @@ export function useMobileTasksWorkspaceCreateProjection(model: ProjectMetadataLo
       workspaceDetectedAgentIds === null
         ? new Set<TuiAgent>(enabledAgents)
         : new Set<TuiAgent>(enabledAgents.filter((agent) => workspaceDetectedAgentIds.has(agent)))
+    // The current choice stays listed even when hidden in Settings, so the picker can show it.
     if (
       workspaceAgent &&
       workspaceAgent !== 'blank' &&
-      isWorkspaceAgentEnabled(workspaceAgent, runtimeTaskSettings.disabledTuiAgents) &&
       (workspaceDetectedAgentIds === null || workspaceDetectedAgentIds.has(workspaceAgent))
     ) {
       availableAgents.add(workspaceAgent)

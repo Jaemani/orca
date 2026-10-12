@@ -1,6 +1,7 @@
 /**
- * Which agent a source-control AI button starts from the phone: the desktop's own resolution
- * (`pickSourceControlLaunchAgent`), fed the same saved recipe, default agent and detected agents.
+ * Which agent a source-control AI button starts from the phone: the action's saved agent when this
+ * host has it, else the desktop's own automatic pick (`pickSourceControlLaunchAgent`) from the same
+ * default agent and detected agents.
  */
 
 import type { GlobalSettings } from '../../../src/shared/global-settings-types'
@@ -14,7 +15,6 @@ import {
   pickSourceControlLaunchAgent,
   readSourceControlLaunchRecipeAgentId
 } from '../../../src/shared/source-control-launch-agent-selection'
-import { filterEnabledTuiAgents } from '../../../src/shared/tui-agent-selection'
 import type { TuiAgent } from '../../../src/shared/tui-agent'
 import { isMobileTuiAgent } from '../tasks/mobile-tui-agents'
 import type { MobileAgentLaunchContext } from './mobile-new-tab-agent-loader'
@@ -38,19 +38,18 @@ export function resolveMobileSourceControlLaunchAgent(
   const detectedAgents = context.detectedAgents.filter(isMobileTuiAgent)
   const recipe = actionId ? readSavedRecipe(settings, context.repo, actionId) : null
   const savedAgent = readSourceControlLaunchRecipeAgentId(recipe)
-  // Why: the phone has no pre-launch dialog showing the pick, so a saved agent that can't run here
-  // is an error, as on the desktop's direct launch, rather than a silent swap to another agent.
-  if (
-    savedAgent &&
-    !filterEnabledTuiAgents(detectedAgents, settings?.disabledTuiAgents).includes(savedAgent)
-  ) {
-    return {
-      kind: 'unavailable',
-      message: 'The saved agent for this action is not available on this workspace host.'
-    }
+  // Why: the phone has no pre-launch dialog showing the pick, so a saved agent that isn't on this
+  // host is an error, as on the desktop's direct launch, rather than a silent swap to another agent.
+  // A saved agent hidden in Settings still starts; hiding only skips it in the automatic pick.
+  if (savedAgent) {
+    return detectedAgents.includes(savedAgent)
+      ? { kind: 'agent', agent: savedAgent, recipe }
+      : {
+          kind: 'unavailable',
+          message: 'The saved agent for this action is not available on this workspace host.'
+        }
   }
   const agent = pickSourceControlLaunchAgent({
-    savedAgent,
     defaultAgent: settings?.defaultTuiAgent,
     detectedAgents,
     disabledAgents: settings?.disabledTuiAgents

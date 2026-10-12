@@ -63,10 +63,6 @@ export function filterWorkspaceAgents(agents: readonly TuiAgent[], disabled?: un
   return filterEnabledMobileTuiAgents(agents, disabled)
 }
 
-export function isWorkspaceAgentEnabled(agent: TuiAgent, disabled?: unknown): boolean {
-  return isMobileTuiAgentEnabled(agent, disabled)
-}
-
 export function resolveWorkspaceAgentSelection({
   selectionActive,
   settings,
@@ -84,12 +80,8 @@ export function resolveWorkspaceAgentSelection({
     return agent === pickedAgent ? current : { agent: pickedAgent, overridden: false }
   }
 
-  if (
-    detectedAgentIds === null ||
-    !agent ||
-    agent === 'blank' ||
-    (detectedAgentIds.has(agent) && isWorkspaceAgentEnabled(agent, settings.disabledTuiAgents))
-  ) {
+  // A chosen agent stays chosen even when hidden in Settings; only an undetected one is dropped.
+  if (detectedAgentIds === null || !agent || agent === 'blank' || detectedAgentIds.has(agent)) {
     return current
   }
 

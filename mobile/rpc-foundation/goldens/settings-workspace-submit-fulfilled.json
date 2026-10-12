@@ -11,17 +11,42 @@
         "disabledTuiAgents": ["claude"]
       }
     },
-    "285bfcc87a38": {
-      "name": "agentOverridden",
-      "ordinal": 6,
-      "value": false
-    },
-    "37e61a793f91": {
-      "name": "selectedAgent",
+    "34ebe202db00": {
+      "name": "worktree.create#1",
       "ordinal": 5,
-      "value": {
-        "id": "codex",
-        "label": "Codex"
+      "args": [
+        {
+          "name": "method",
+          "value": "worktree.create"
+        },
+        {
+          "name": "params",
+          "value": {
+            "createdWithAgent": "claude",
+            "displayName": "recorded",
+            "displayNameKind": "user",
+            "name": "recorded",
+            "repo": "id:repo-1",
+            "setupDecision": "inherit",
+            "startupAgent": "claude"
+          }
+        },
+        {
+          "name": "options",
+          "value": {
+            "timeoutMs": 600000
+          }
+        }
+      ],
+      "settlement": {
+        "status": "rejected",
+        "startedAt": 0,
+        "settledAt": 0,
+        "error": {
+          "category": "Error",
+          "message": "Connection closed",
+          "isRpcDeliveryUnknown": true
+        }
       }
     },
     "39f99cf479f0": {
@@ -29,10 +54,15 @@
       "ordinal": 1,
       "value": ""
     },
-    "483b4c51c982": {
+    "43d3776368e0": {
+      "name": "worktree.create#1",
+      "ordinal": 6,
+      "json": "{\"id\":\"frame-2\",\"deviceToken\":\"recording-device\",\"method\":\"worktree.create\",\"params\":{\"repo\":\"id:repo-1\",\"setupDecision\":\"inherit\",\"name\":\"recorded\",\"displayName\":\"recorded\",\"displayNameKind\":\"user\",\"startupAgent\":\"claude\",\"createdWithAgent\":\"claude\"}}"
+    },
+    "45fcf53c5b68": {
       "name": "error",
       "ordinal": 7,
-      "value": "Selected agent is disabled. Choose an enabled agent before creating."
+      "value": "Connection closed"
     },
     "51d4cb56be85": {
       "name": "settings.get#1",
@@ -71,15 +101,36 @@
         "visibleTaskProviders": ["github", "linear"]
       }
     },
-    "5efbd884ea5a": {
-      "creating": false,
-      "error": "Selected agent is disabled. Choose an enabled agent before creating.",
-      "settings": {
-        "defaultTuiAgent": "codex",
-        "disabledTuiAgents": ["claude"],
-        "hostSettingOverrides": {},
-        "prBotAuthorOverrides": ["bot-user"],
-        "visibleTaskProviders": ["github", "linear"]
+    "58939cb0b8a9": {
+      "name": "worktree.create#1",
+      "ordinal": 5,
+      "args": [
+        {
+          "name": "method",
+          "value": "worktree.create"
+        },
+        {
+          "name": "params",
+          "value": {
+            "createdWithAgent": "claude",
+            "displayName": "recorded",
+            "displayNameKind": "user",
+            "name": "recorded",
+            "repo": "id:repo-1",
+            "setupDecision": "inherit",
+            "startupAgent": "claude"
+          }
+        },
+        {
+          "name": "options",
+          "value": {
+            "timeoutMs": 600000
+          }
+        }
+      ],
+      "settlement": {
+        "status": "pending",
+        "startedAt": 0
       }
     },
     "778f05cac35e": {
@@ -126,6 +177,17 @@
       "status": "pending",
       "startedAt": 0
     },
+    "ca2c96890e77": {
+      "creating": true,
+      "error": "",
+      "settings": {
+        "defaultTuiAgent": "codex",
+        "disabledTuiAgents": ["claude"],
+        "hostSettingOverrides": {},
+        "prBotAuthorOverrides": ["bot-user"],
+        "visibleTaskProviders": ["github", "linear"]
+      }
+    },
     "eb79a9b3682a": {
       "status": "fulfilled",
       "startedAt": 0,
@@ -159,20 +221,27 @@
       {
         "id": "settled",
         "observation": {
-          "sender": ["778f05cac35e"],
-          "payloads": ["f648b042d810"],
+          "sender": ["778f05cac35e", "58939cb0b8a9"],
+          "payloads": ["f648b042d810", "43d3776368e0"],
+          "settlements": {
+            "mount": "eb79a9b3682a",
+            "submit": "9270aeb7d9c6"
+          },
+          "state": "ca2c96890e77",
+          "effects": ["39f99cf479f0", "58752e3dadee"]
+        }
+      },
+      {
+        "id": "cleanup",
+        "observation": {
+          "sender": ["778f05cac35e", "34ebe202db00"],
+          "payloads": ["f648b042d810", "43d3776368e0"],
           "settlements": {
             "mount": "eb79a9b3682a",
             "submit": "eb79a9b3682a"
           },
-          "state": "5efbd884ea5a",
-          "effects": [
-            "39f99cf479f0",
-            "58752e3dadee",
-            "37e61a793f91",
-            "285bfcc87a38",
-            "483b4c51c982"
-          ]
+          "state": "ca2c96890e77",
+          "effects": ["39f99cf479f0", "58752e3dadee", "45fcf53c5b68"]
         }
       }
     ]

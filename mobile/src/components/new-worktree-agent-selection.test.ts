@@ -52,7 +52,7 @@ describe('new worktree agent selection', () => {
     })
   })
 
-  it('clears a disabled user override after detection completes', () => {
+  it('keeps a user override that is hidden in Settings', () => {
     const resolved = resolveNewWorktreeAgentSelection({
       visible: true,
       selectedAgent: newWorktreeAgentOptionFor('codex'),
@@ -62,8 +62,8 @@ describe('new worktree agent selection', () => {
     })
 
     expect(resolved).toEqual({
-      selectedAgent: newWorktreeAgentOptionFor('claude'),
-      agentOverridden: false
+      selectedAgent: newWorktreeAgentOptionFor('codex'),
+      agentOverridden: true
     })
   })
 

@@ -11,13 +11,6 @@
         "disabledTuiAgents": ["claude"]
       }
     },
-    "2e8e352c8dd1": {
-      "creating": false,
-      "error": "Selected agent is disabled. Choose an enabled agent before creating.",
-      "settings": {
-        "disabledTuiAgents": ["claude"]
-      }
-    },
     "39f99cf479f0": {
       "name": "error",
       "ordinal": 1,
@@ -49,27 +42,84 @@
         "startedAt": 0
       }
     },
-    "5940cb6d5fdf": {
-      "name": "error",
-      "ordinal": 6,
-      "value": "Selected agent is disabled. Choose an enabled agent before creating."
+    "72251a62f76b": {
+      "name": "worktree.create#1",
+      "ordinal": 4,
+      "args": [
+        {
+          "name": "method",
+          "value": "worktree.create"
+        },
+        {
+          "name": "params",
+          "value": {
+            "createdWithAgent": "claude",
+            "displayName": "recorded",
+            "displayNameKind": "user",
+            "name": "recorded",
+            "repo": "id:repo-1",
+            "setupDecision": "inherit",
+            "startupAgent": "claude"
+          }
+        },
+        {
+          "name": "options",
+          "value": {
+            "timeoutMs": 600000
+          }
+        }
+      ],
+      "settlement": {
+        "status": "pending",
+        "startedAt": 0
+      }
+    },
+    "83237138213c": {
+      "name": "worktree.create#1",
+      "ordinal": 4,
+      "args": [
+        {
+          "name": "method",
+          "value": "worktree.create"
+        },
+        {
+          "name": "params",
+          "value": {
+            "createdWithAgent": "claude",
+            "displayName": "recorded",
+            "displayNameKind": "user",
+            "name": "recorded",
+            "repo": "id:repo-1",
+            "setupDecision": "inherit",
+            "startupAgent": "claude"
+          }
+        },
+        {
+          "name": "options",
+          "value": {
+            "timeoutMs": 600000
+          }
+        }
+      ],
+      "settlement": {
+        "status": "rejected",
+        "startedAt": 0,
+        "settledAt": 0,
+        "error": {
+          "category": "Error",
+          "message": "Connection closed",
+          "isRpcDeliveryUnknown": true
+        }
+      }
     },
     "9270aeb7d9c6": {
       "status": "pending",
       "startedAt": 0
     },
-    "94ddc6962cd6": {
-      "name": "selectedAgent",
-      "ordinal": 4,
-      "value": {
-        "id": "codex",
-        "label": "Codex"
-      }
-    },
-    "bc0a5f0f4956": {
-      "name": "agentOverridden",
-      "ordinal": 5,
-      "value": false
+    "b441f0ab6ed1": {
+      "name": "error",
+      "ordinal": 6,
+      "value": "Connection closed"
     },
     "eb79a9b3682a": {
       "status": "fulfilled",
@@ -78,6 +128,11 @@
       "value": {
         "$rpc": "undefined"
       }
+    },
+    "f3c0fdeccce0": {
+      "name": "worktree.create#1",
+      "ordinal": 5,
+      "json": "{\"id\":\"frame-2\",\"deviceToken\":\"recording-device\",\"method\":\"worktree.create\",\"params\":{\"repo\":\"id:repo-1\",\"setupDecision\":\"inherit\",\"name\":\"recorded\",\"displayName\":\"recorded\",\"displayNameKind\":\"user\",\"startupAgent\":\"claude\",\"createdWithAgent\":\"claude\"}}"
     },
     "f4c218ff736f": {
       "name": "settings.get#1",
@@ -136,14 +191,27 @@
       {
         "id": "settled",
         "observation": {
-          "sender": ["f4c218ff736f"],
-          "payloads": ["f648b042d810"],
+          "sender": ["f4c218ff736f", "72251a62f76b"],
+          "payloads": ["f648b042d810", "f3c0fdeccce0"],
+          "settlements": {
+            "mount": "eb79a9b3682a",
+            "submit": "9270aeb7d9c6"
+          },
+          "state": "13c996e4ec2b",
+          "effects": ["39f99cf479f0"]
+        }
+      },
+      {
+        "id": "cleanup",
+        "observation": {
+          "sender": ["f4c218ff736f", "83237138213c"],
+          "payloads": ["f648b042d810", "f3c0fdeccce0"],
           "settlements": {
             "mount": "eb79a9b3682a",
             "submit": "eb79a9b3682a"
           },
-          "state": "2e8e352c8dd1",
-          "effects": ["39f99cf479f0", "94ddc6962cd6", "bc0a5f0f4956", "5940cb6d5fdf"]
+          "state": "13c996e4ec2b",
+          "effects": ["39f99cf479f0", "b441f0ab6ed1"]
         }
       }
     ]

@@ -192,6 +192,30 @@ describe('launchAgentWithPrompt', () => {
     expect(launchParams(sendRequest)).toBeUndefined()
   })
 
+  it("sends a saved agent hidden in Settings, and shows an older host's refusal of it", async () => {
+    const { client, sendRequest } = hostClient({
+      settings: {
+        disabledTuiAgents: ['claude'],
+        sourceControlAi: { actions: { fixChecks: { agentId: 'claude' } } }
+      },
+      // A host from before hidden agents could launch still refuses them.
+      launch: {
+        id: 'x',
+        ok: false,
+        error: {
+          code: 'agent_launch_failed',
+          message: 'Agent claude is disabled. Choose an enabled agent.'
+        },
+        _meta: { runtimeId: 'r' }
+      }
+    })
+    await expect(run(client)).resolves.toEqual({
+      kind: 'not-started',
+      message: 'Agent claude is disabled. Choose an enabled agent.'
+    })
+    expect(launchParams(sendRequest)).toMatchObject({ agent: 'claude' })
+  })
+
   it('still launches an agent when the default is a blank terminal', async () => {
     const { client, sendRequest } = hostClient({
       settings: { defaultTuiAgent: 'blank' },

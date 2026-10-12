@@ -78,6 +78,44 @@
         "disabledTuiAgents": ["claude"]
       }
     },
+    "188b58f7070a": {
+      "name": "worktree.create#1",
+      "ordinal": 4,
+      "args": [
+        {
+          "name": "method",
+          "value": "worktree.create"
+        },
+        {
+          "name": "params",
+          "value": {
+            "createdWithAgent": "claude",
+            "displayName": "recorded",
+            "displayNameKind": "user",
+            "name": "recorded",
+            "repo": "id:repo-1",
+            "setupDecision": "inherit",
+            "startupAgent": "claude"
+          }
+        },
+        {
+          "name": "options",
+          "value": {
+            "timeoutMs": 600000
+          }
+        }
+      ],
+      "settlement": {
+        "status": "rejected",
+        "startedAt": 0,
+        "settledAt": 0,
+        "error": {
+          "category": "Error",
+          "message": "Client closed",
+          "isRpcDeliveryUnknown": false
+        }
+      }
+    },
     "1a9d36fca761": {
       "name": "settings.get#1",
       "ordinal": 2,
@@ -113,18 +151,6 @@
             "ok": false
           }
         }
-      }
-    },
-    "285bfcc87a38": {
-      "name": "agentOverridden",
-      "ordinal": 6,
-      "value": false
-    },
-    "2e8e352c8dd1": {
-      "creating": false,
-      "error": "Selected agent is disabled. Choose an enabled agent before creating.",
-      "settings": {
-        "disabledTuiAgents": ["claude"]
       }
     },
     "34ebe202db00": {
@@ -165,14 +191,6 @@
         }
       }
     },
-    "37e61a793f91": {
-      "name": "selectedAgent",
-      "ordinal": 5,
-      "value": {
-        "id": "codex",
-        "label": "Codex"
-      }
-    },
     "39f99cf479f0": {
       "name": "error",
       "ordinal": 1,
@@ -187,11 +205,6 @@
       "name": "error",
       "ordinal": 7,
       "value": "Connection closed"
-    },
-    "483b4c51c982": {
-      "name": "error",
-      "ordinal": 7,
-      "value": "Selected agent is disabled. Choose an enabled agent before creating."
     },
     "48d1cd313a00": {
       "name": "settings.get#1",
@@ -364,11 +377,6 @@
         "startedAt": 0
       }
     },
-    "5940cb6d5fdf": {
-      "name": "error",
-      "ordinal": 6,
-      "value": "Selected agent is disabled. Choose an enabled agent before creating."
-    },
     "5c233f0d08af": {
       "name": "settings.get#1",
       "ordinal": 2,
@@ -403,15 +411,41 @@
         }
       }
     },
-    "5efbd884ea5a": {
-      "creating": false,
-      "error": "Selected agent is disabled. Choose an enabled agent before creating.",
-      "settings": {
-        "defaultTuiAgent": "codex",
-        "disabledTuiAgents": ["claude"],
-        "hostSettingOverrides": {},
-        "prBotAuthorOverrides": ["bot-user"],
-        "visibleTaskProviders": ["github", "linear"]
+    "6bf09f13160c": {
+      "name": "error",
+      "ordinal": 5,
+      "value": "Client closed"
+    },
+    "72251a62f76b": {
+      "name": "worktree.create#1",
+      "ordinal": 4,
+      "args": [
+        {
+          "name": "method",
+          "value": "worktree.create"
+        },
+        {
+          "name": "params",
+          "value": {
+            "createdWithAgent": "claude",
+            "displayName": "recorded",
+            "displayNameKind": "user",
+            "name": "recorded",
+            "repo": "id:repo-1",
+            "setupDecision": "inherit",
+            "startupAgent": "claude"
+          }
+        },
+        {
+          "name": "options",
+          "value": {
+            "timeoutMs": 600000
+          }
+        }
+      ],
+      "settlement": {
+        "status": "pending",
+        "startedAt": 0
       }
     },
     "778f05cac35e": {
@@ -461,17 +495,47 @@
         "$rpc": "undefined"
       }
     },
+    "83237138213c": {
+      "name": "worktree.create#1",
+      "ordinal": 4,
+      "args": [
+        {
+          "name": "method",
+          "value": "worktree.create"
+        },
+        {
+          "name": "params",
+          "value": {
+            "createdWithAgent": "claude",
+            "displayName": "recorded",
+            "displayNameKind": "user",
+            "name": "recorded",
+            "repo": "id:repo-1",
+            "setupDecision": "inherit",
+            "startupAgent": "claude"
+          }
+        },
+        {
+          "name": "options",
+          "value": {
+            "timeoutMs": 600000
+          }
+        }
+      ],
+      "settlement": {
+        "status": "rejected",
+        "startedAt": 0,
+        "settledAt": 0,
+        "error": {
+          "category": "Error",
+          "message": "Connection closed",
+          "isRpcDeliveryUnknown": true
+        }
+      }
+    },
     "9270aeb7d9c6": {
       "status": "pending",
       "startedAt": 0
-    },
-    "94ddc6962cd6": {
-      "name": "selectedAgent",
-      "ordinal": 4,
-      "value": {
-        "id": "codex",
-        "label": "Codex"
-      }
     },
     "a5135e33554f": {
       "name": "settings.get#1",
@@ -507,10 +571,10 @@
         }
       }
     },
-    "bc0a5f0f4956": {
-      "name": "agentOverridden",
-      "ordinal": 5,
-      "value": false
+    "b441f0ab6ed1": {
+      "name": "error",
+      "ordinal": 6,
+      "value": "Connection closed"
     },
     "c752520a09af": {
       "name": "settings.get#1",
@@ -545,6 +609,17 @@
             "ok": false
           }
         }
+      }
+    },
+    "ca2c96890e77": {
+      "creating": true,
+      "error": "",
+      "settings": {
+        "defaultTuiAgent": "codex",
+        "disabledTuiAgents": ["claude"],
+        "hostSettingOverrides": {},
+        "prBotAuthorOverrides": ["bot-user"],
+        "visibleTaskProviders": ["github", "linear"]
       }
     },
     "d02636603cfd": {
@@ -625,6 +700,11 @@
         "$rpc": "undefined"
       }
     },
+    "f3c0fdeccce0": {
+      "name": "worktree.create#1",
+      "ordinal": 5,
+      "json": "{\"id\":\"frame-2\",\"deviceToken\":\"recording-device\",\"method\":\"worktree.create\",\"params\":{\"repo\":\"id:repo-1\",\"setupDecision\":\"inherit\",\"name\":\"recorded\",\"displayName\":\"recorded\",\"displayNameKind\":\"user\",\"startupAgent\":\"claude\",\"createdWithAgent\":\"claude\"}}"
+    },
     "f648b042d810": {
       "name": "settings.get#1",
       "ordinal": 3,
@@ -650,59 +730,92 @@
       {
         "id": "settings-workspace-submit-fulfilled.prelude:cleanup",
         "observation": {
-          "sender": ["dc0e0f9e2e34"],
+          "sender": ["dc0e0f9e2e34", "188b58f7070a"],
           "payloads": ["f648b042d810"],
           "settlements": {
             "mount": "eb79a9b3682a",
             "submit": "eb79a9b3682a"
           },
           "state": "13c996e4ec2b",
-          "effects": ["39f99cf479f0", "94ddc6962cd6", "bc0a5f0f4956", "5940cb6d5fdf"]
+          "effects": ["39f99cf479f0", "6bf09f13160c"]
         }
       },
       {
         "id": "settings-workspace-submit-fulfilled.normal:settled",
         "observation": {
-          "sender": ["778f05cac35e"],
-          "payloads": ["f648b042d810"],
+          "sender": ["778f05cac35e", "58939cb0b8a9"],
+          "payloads": ["f648b042d810", "43d3776368e0"],
+          "settlements": {
+            "mount": "eb79a9b3682a",
+            "submit": "9270aeb7d9c6"
+          },
+          "state": "ca2c96890e77",
+          "effects": ["39f99cf479f0", "58752e3dadee"]
+        }
+      },
+      {
+        "id": "settings-workspace-submit-fulfilled.normal:cleanup",
+        "observation": {
+          "sender": ["778f05cac35e", "34ebe202db00"],
+          "payloads": ["f648b042d810", "43d3776368e0"],
           "settlements": {
             "mount": "eb79a9b3682a",
             "submit": "eb79a9b3682a"
           },
-          "state": "5efbd884ea5a",
-          "effects": [
-            "39f99cf479f0",
-            "58752e3dadee",
-            "37e61a793f91",
-            "285bfcc87a38",
-            "483b4c51c982"
-          ]
+          "state": "ca2c96890e77",
+          "effects": ["39f99cf479f0", "58752e3dadee", "45fcf53c5b68"]
         }
       },
       {
         "id": "settings-workspace-submit-fulfilled.result-absent:settled",
         "observation": {
-          "sender": ["d02636603cfd"],
-          "payloads": ["f648b042d810"],
+          "sender": ["d02636603cfd", "72251a62f76b"],
+          "payloads": ["f648b042d810", "f3c0fdeccce0"],
+          "settlements": {
+            "mount": "eb79a9b3682a",
+            "submit": "9270aeb7d9c6"
+          },
+          "state": "13c996e4ec2b",
+          "effects": ["39f99cf479f0"]
+        }
+      },
+      {
+        "id": "settings-workspace-submit-fulfilled.result-absent:cleanup",
+        "observation": {
+          "sender": ["d02636603cfd", "83237138213c"],
+          "payloads": ["f648b042d810", "f3c0fdeccce0"],
           "settlements": {
             "mount": "eb79a9b3682a",
             "submit": "eb79a9b3682a"
           },
-          "state": "2e8e352c8dd1",
-          "effects": ["39f99cf479f0", "94ddc6962cd6", "bc0a5f0f4956", "5940cb6d5fdf"]
+          "state": "13c996e4ec2b",
+          "effects": ["39f99cf479f0", "b441f0ab6ed1"]
         }
       },
       {
         "id": "settings-workspace-submit-fulfilled.result-null:settled",
         "observation": {
-          "sender": ["a5135e33554f"],
-          "payloads": ["f648b042d810"],
+          "sender": ["a5135e33554f", "72251a62f76b"],
+          "payloads": ["f648b042d810", "f3c0fdeccce0"],
+          "settlements": {
+            "mount": "eb79a9b3682a",
+            "submit": "9270aeb7d9c6"
+          },
+          "state": "13c996e4ec2b",
+          "effects": ["39f99cf479f0"]
+        }
+      },
+      {
+        "id": "settings-workspace-submit-fulfilled.result-null:cleanup",
+        "observation": {
+          "sender": ["a5135e33554f", "83237138213c"],
+          "payloads": ["f648b042d810", "f3c0fdeccce0"],
           "settlements": {
             "mount": "eb79a9b3682a",
             "submit": "eb79a9b3682a"
           },
-          "state": "2e8e352c8dd1",
-          "effects": ["39f99cf479f0", "94ddc6962cd6", "bc0a5f0f4956", "5940cb6d5fdf"]
+          "state": "13c996e4ec2b",
+          "effects": ["39f99cf479f0", "b441f0ab6ed1"]
         }
       },
       {
@@ -786,66 +899,131 @@
       {
         "id": "settings-workspace-submit-fulfilled.outer-refused:settled",
         "observation": {
-          "sender": ["48d1cd313a00"],
-          "payloads": ["f648b042d810"],
+          "sender": ["48d1cd313a00", "72251a62f76b"],
+          "payloads": ["f648b042d810", "f3c0fdeccce0"],
+          "settlements": {
+            "mount": "eb79a9b3682a",
+            "submit": "9270aeb7d9c6"
+          },
+          "state": "13c996e4ec2b",
+          "effects": ["39f99cf479f0"]
+        }
+      },
+      {
+        "id": "settings-workspace-submit-fulfilled.outer-refused:cleanup",
+        "observation": {
+          "sender": ["48d1cd313a00", "83237138213c"],
+          "payloads": ["f648b042d810", "f3c0fdeccce0"],
           "settlements": {
             "mount": "eb79a9b3682a",
             "submit": "eb79a9b3682a"
           },
-          "state": "2e8e352c8dd1",
-          "effects": ["39f99cf479f0", "94ddc6962cd6", "bc0a5f0f4956", "5940cb6d5fdf"]
+          "state": "13c996e4ec2b",
+          "effects": ["39f99cf479f0", "b441f0ab6ed1"]
         }
       },
       {
         "id": "settings-workspace-submit-fulfilled.outer-refused-no-message:settled",
         "observation": {
-          "sender": ["003c16e56b1f"],
-          "payloads": ["f648b042d810"],
+          "sender": ["003c16e56b1f", "72251a62f76b"],
+          "payloads": ["f648b042d810", "f3c0fdeccce0"],
+          "settlements": {
+            "mount": "eb79a9b3682a",
+            "submit": "9270aeb7d9c6"
+          },
+          "state": "13c996e4ec2b",
+          "effects": ["39f99cf479f0"]
+        }
+      },
+      {
+        "id": "settings-workspace-submit-fulfilled.outer-refused-no-message:cleanup",
+        "observation": {
+          "sender": ["003c16e56b1f", "83237138213c"],
+          "payloads": ["f648b042d810", "f3c0fdeccce0"],
           "settlements": {
             "mount": "eb79a9b3682a",
             "submit": "eb79a9b3682a"
           },
-          "state": "2e8e352c8dd1",
-          "effects": ["39f99cf479f0", "94ddc6962cd6", "bc0a5f0f4956", "5940cb6d5fdf"]
+          "state": "13c996e4ec2b",
+          "effects": ["39f99cf479f0", "b441f0ab6ed1"]
         }
       },
       {
         "id": "settings-workspace-submit-fulfilled.method-not-found:settled",
         "observation": {
-          "sender": ["5368ee038065"],
-          "payloads": ["f648b042d810"],
+          "sender": ["5368ee038065", "72251a62f76b"],
+          "payloads": ["f648b042d810", "f3c0fdeccce0"],
+          "settlements": {
+            "mount": "eb79a9b3682a",
+            "submit": "9270aeb7d9c6"
+          },
+          "state": "13c996e4ec2b",
+          "effects": ["39f99cf479f0"]
+        }
+      },
+      {
+        "id": "settings-workspace-submit-fulfilled.method-not-found:cleanup",
+        "observation": {
+          "sender": ["5368ee038065", "83237138213c"],
+          "payloads": ["f648b042d810", "f3c0fdeccce0"],
           "settlements": {
             "mount": "eb79a9b3682a",
             "submit": "eb79a9b3682a"
           },
-          "state": "2e8e352c8dd1",
-          "effects": ["39f99cf479f0", "94ddc6962cd6", "bc0a5f0f4956", "5940cb6d5fdf"]
+          "state": "13c996e4ec2b",
+          "effects": ["39f99cf479f0", "b441f0ab6ed1"]
         }
       },
       {
         "id": "settings-workspace-submit-fulfilled.transport-rejection:settled",
         "observation": {
-          "sender": ["566d8202b582"],
-          "payloads": ["f648b042d810"],
+          "sender": ["566d8202b582", "72251a62f76b"],
+          "payloads": ["f648b042d810", "f3c0fdeccce0"],
+          "settlements": {
+            "mount": "eb79a9b3682a",
+            "submit": "9270aeb7d9c6"
+          },
+          "state": "13c996e4ec2b",
+          "effects": ["39f99cf479f0"]
+        }
+      },
+      {
+        "id": "settings-workspace-submit-fulfilled.transport-rejection:cleanup",
+        "observation": {
+          "sender": ["566d8202b582", "83237138213c"],
+          "payloads": ["f648b042d810", "f3c0fdeccce0"],
           "settlements": {
             "mount": "eb79a9b3682a",
             "submit": "eb79a9b3682a"
           },
-          "state": "2e8e352c8dd1",
-          "effects": ["39f99cf479f0", "94ddc6962cd6", "bc0a5f0f4956", "5940cb6d5fdf"]
+          "state": "13c996e4ec2b",
+          "effects": ["39f99cf479f0", "b441f0ab6ed1"]
         }
       },
       {
         "id": "settings-workspace-submit-fulfilled.transport-rejection-no-message:settled",
         "observation": {
-          "sender": ["0ca529648be4"],
-          "payloads": ["f648b042d810"],
+          "sender": ["0ca529648be4", "72251a62f76b"],
+          "payloads": ["f648b042d810", "f3c0fdeccce0"],
+          "settlements": {
+            "mount": "eb79a9b3682a",
+            "submit": "9270aeb7d9c6"
+          },
+          "state": "13c996e4ec2b",
+          "effects": ["39f99cf479f0"]
+        }
+      },
+      {
+        "id": "settings-workspace-submit-fulfilled.transport-rejection-no-message:cleanup",
+        "observation": {
+          "sender": ["0ca529648be4", "83237138213c"],
+          "payloads": ["f648b042d810", "f3c0fdeccce0"],
           "settlements": {
             "mount": "eb79a9b3682a",
             "submit": "eb79a9b3682a"
           },
-          "state": "2e8e352c8dd1",
-          "effects": ["39f99cf479f0", "94ddc6962cd6", "bc0a5f0f4956", "5940cb6d5fdf"]
+          "state": "13c996e4ec2b",
+          "effects": ["39f99cf479f0", "b441f0ab6ed1"]
         }
       }
     ]

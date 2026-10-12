@@ -92,7 +92,6 @@ export { buildTaskWorkspaceCreateParams } from './workspace-create-params'
 export { MOBILE_TASKS_CAPABILITY } from './mobile-tasks-capability'
 export {
   filterWorkspaceAgents,
-  isWorkspaceAgentEnabled,
   pickWorkspaceAgent,
   resolveWorkspaceAgentSelection,
   workspaceAgentLabel

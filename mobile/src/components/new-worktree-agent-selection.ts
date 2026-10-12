@@ -1,6 +1,5 @@
 import type { TuiAgent } from '../../../src/shared/tui-agent'
 import { MOBILE_AGENT_CATALOG } from '../tasks/mobile-agent-catalog'
-import { isMobileTuiAgentEnabled } from '../tasks/mobile-tui-agents'
 import { pickWorkspaceAgent } from '../tasks/workspace-agent-selection'
 
 export type NewWorktreeRuntimeSettings = {
@@ -43,18 +42,12 @@ export function pickPreferredNewWorktreeAgent(
   )
 }
 
+// A chosen agent stays chosen even when hidden in Settings; only an undetected one is dropped.
 function isSelectableAgent(
   agent: NewWorktreeAgentOption,
-  settings: NewWorktreeRuntimeSettings | null,
   detectedAgentIds: Set<string> | null
 ): boolean {
-  if (agent.id === '__blank__') {
-    return true
-  }
-  if (!isMobileTuiAgentEnabled(agent.id, settings?.disabledTuiAgents)) {
-    return false
-  }
-  return detectedAgentIds === null || detectedAgentIds.has(agent.id)
+  return agent.id === '__blank__' || detectedAgentIds === null || detectedAgentIds.has(agent.id)
 }
 
 export function resolveNewWorktreeAgentSelection({
@@ -79,10 +72,7 @@ export function resolveNewWorktreeAgentSelection({
     return { selectedAgent: preferred, agentOverridden: false }
   }
 
-  if (
-    detectedAgentIds !== null &&
-    !isSelectableAgent(selectedAgent, runtimeSettings, detectedAgentIds)
-  ) {
+  if (detectedAgentIds !== null && !isSelectableAgent(selectedAgent, detectedAgentIds)) {
     return { selectedAgent: preferred, agentOverridden: false }
   }
 

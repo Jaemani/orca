@@ -4,7 +4,6 @@ import type { PersistedTrustedOrcaHooks } from '../../../src/shared/orca-yaml-ho
 import type { RetiredNameRegistry } from '../../../src/shared/worktree/retired-name-registry'
 import type { RpcClient } from '../transport/rpc-client'
 import { createBlankWorkspace } from '../tasks/blank-workspace-create'
-import { isMobileTuiAgentEnabled } from '../tasks/mobile-tui-agents'
 import {
   isSetupHookTrusted,
   persistSetupHookTrustApproval,
@@ -18,10 +17,9 @@ import type { AgentLaunchSupport } from '../tasks/agent-launch-request'
 import type { WorkspaceSshGate } from '../tasks/workspace-ssh-gate'
 import type { useMobileComposerSource } from '../tasks/use-mobile-composer-source'
 import type { WorktreeCreateIdempotencySupport } from '../tasks/worktree-create-idempotency-policy'
-import {
-  pickPreferredNewWorktreeAgent,
-  type NewWorktreeAgentOption,
-  type NewWorktreeRuntimeSettings
+import type {
+  NewWorktreeAgentOption,
+  NewWorktreeRuntimeSettings
 } from './new-worktree-agent-selection'
 import type { MobileWorkspaceRepo, SetupRunPolicy } from './new-worktree-modal-types'
 import type { SetupTrustPrompt } from './SetupHookTrustDrawer'
@@ -39,11 +37,8 @@ export function useNewWorkspaceCreateSubmit(args: {
   client: RpcClient | null
   selectedRepo: MobileWorkspaceRepo | null
   selectedAgent: NewWorktreeAgentOption
-  setSelectedAgent: (agent: NewWorktreeAgentOption) => void
-  setAgentOverridden: (overridden: boolean) => void
   runtimeSettings: NewWorktreeRuntimeSettings | null
   setRuntimeSettings: (settings: NewWorktreeRuntimeSettings) => void
-  detectedAgentIds: Set<string> | null
   sshGate: WorkspaceSshGate
   composer: Composer
   note: string
@@ -88,28 +83,15 @@ export function useNewWorkspaceCreateSubmit(args: {
         args.setError(`Connect ${selectedRepo.displayName} before creating a workspace.`)
         return
       }
-      let latestRuntimeSettings = args.runtimeSettings
       try {
         const settingsReply = await settingsRead.request(client)
         const settings = settingsRead.interpret(settingsReply)
         if (settings.accepted) {
           // oxlint-disable-next-line typescript/consistent-type-assertions -- SAFETY: Preserve the established response shape at this boundary.
-          latestRuntimeSettings = settings.value as NewWorktreeRuntimeSettings
-          args.setRuntimeSettings(latestRuntimeSettings)
+          args.setRuntimeSettings(settings.value as NewWorktreeRuntimeSettings)
         }
       } catch {
-        // The runtime validates the same setting before spawning.
-      }
-      if (
-        args.selectedAgent.id !== '__blank__' &&
-        !isMobileTuiAgentEnabled(args.selectedAgent.id, latestRuntimeSettings?.disabledTuiAgents)
-      ) {
-        args.setSelectedAgent(
-          pickPreferredNewWorktreeAgent(latestRuntimeSettings, args.detectedAgentIds)
-        )
-        args.setAgentOverridden(false)
-        args.setError('Selected agent is disabled. Choose an enabled agent before creating.')
-        return
+        // Best-effort refresh, so the sheet shows the host's current agents if the create fails.
       }
 
       const trimmedName = args.composer.name.trim()

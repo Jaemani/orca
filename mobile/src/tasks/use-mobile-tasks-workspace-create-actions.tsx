@@ -6,7 +6,6 @@ import {
   type WorkspaceAgentChoice,
   buildTaskWorkspaceCreateParams,
   isSetupHookTrusted,
-  isWorkspaceAgentEnabled,
   pickWorkspaceAgent,
   shouldResolveHostedReviewStartPoint,
   useCallback,
@@ -40,8 +39,6 @@ export function useMobileTasksWorkspaceCreateActions(model: WorkspaceSshStateMod
     setOrcaYamlTrustPrompt,
     setRuntimeTaskSettings,
     setSetupPrompt,
-    setWorkspaceAgent,
-    setWorkspaceAgentOverridden,
     setWorkspaceCreateDraft,
     taskStateHydrated,
     tasksSupported,
@@ -87,23 +84,11 @@ export function useMobileTasksWorkspaceCreateActions(model: WorkspaceSshStateMod
             setRuntimeTaskSettings(latestRuntimeTaskSettings)
           }
         } catch {
-          // Best-effort refresh; the runtime still validates agent availability before spawning.
+          // Best-effort refresh; only the automatic pick below reads it.
         }
+        // A chosen agent starts even when hidden in Settings; hiding only skips it in the automatic pick.
         const selectedAgent =
-          agentOverride &&
-          (agentOverride === 'blank' ||
-            isWorkspaceAgentEnabled(agentOverride, latestRuntimeTaskSettings.disabledTuiAgents))
-            ? agentOverride
-            : pickWorkspaceAgent(latestRuntimeTaskSettings, workspaceDetectedAgentIds)
-        if (
-          agentOverride &&
-          agentOverride !== 'blank' &&
-          !isWorkspaceAgentEnabled(agentOverride, latestRuntimeTaskSettings.disabledTuiAgents)
-        ) {
-          setWorkspaceAgent(selectedAgent)
-          setWorkspaceAgentOverridden(false)
-          throw new Error('Selected agent is disabled. Choose an enabled agent before creating.')
-        }
+          agentOverride ?? pickWorkspaceAgent(latestRuntimeTaskSettings, workspaceDetectedAgentIds)
         const setupResolution = await resolveCreateSetupDecision(targetRepo, setupOverride)
         const comment = noteOverride?.trim()
         if (setupResolution.kind === 'prompt') {
