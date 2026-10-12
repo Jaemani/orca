@@ -56,7 +56,11 @@ export function resolveMobileSourceControlLaunchAgent(
   })
   return agent
     ? { kind: 'agent', agent, recipe }
-    : { kind: 'unavailable', message: 'No enabled AI agent was detected on this workspace host.' }
+    : {
+        kind: 'unavailable',
+        message:
+          'No AI agent on this workspace host is both installed and shown in Settings. Install one there, or show one in Settings on your computer.'
+      }
 }
 
 function readLaunchAgentSettings(settings: unknown): LaunchAgentSettings | null {

@@ -67,7 +67,7 @@ export function useMobileSessionPanelRouteActions(scope: MobileSessionPresentati
         : createTabAgentLoadState === 'loaded'
           ? [
               {
-                label: 'No Enabled Agents',
+                label: 'All Agents Hidden or Not Installed',
                 icon: Bot,
                 disabled: true,
                 onPress: () => {}
@@ -121,7 +121,7 @@ export function useMobileSessionPanelRouteActions(scope: MobileSessionPresentati
           : createTabAgentLoadState === 'loaded'
             ? [
                 {
-                  label: 'No Enabled Agents',
+                  label: 'All Agents Hidden or Not Installed',
                   icon: Bot,
                   disabled: true,
                   onPress: () => {}

@@ -227,14 +227,15 @@ describe('launchAgentWithPrompt', () => {
     expect(launchParams(sendRequest)).toMatchObject({ agent: 'claude' })
   })
 
-  it('reports no agent when none is detected and enabled', async () => {
+  it('reports no agent when none is detected and shown', async () => {
     const { client } = hostClient({
       settings: { disabledTuiAgents: ['claude'] },
       detected: ['claude']
     })
     await expect(run(client)).resolves.toEqual({
       kind: 'not-started',
-      message: 'No enabled AI agent was detected on this workspace host.'
+      message:
+        'No AI agent on this workspace host is both installed and shown in Settings. Install one there, or show one in Settings on your computer.'
     })
   })
 
