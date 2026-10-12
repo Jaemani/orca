@@ -37,18 +37,18 @@ export function AgentAvailabilityControl({
       }}
       ariaLabel={translate(
         'auto.components.settings.AgentsPane.1c9a9679ec',
-        '{{value0}} availability',
+        '{{value0}} visibility',
         { value0: label }
       )}
       size="sm"
       options={[
         {
           value: 'enabled',
-          label: translate('auto.components.settings.AgentsPane.d4d2a45d63', 'Enabled')
+          label: translate('auto.components.settings.AgentsPane.d4d2a45d63', 'Shown')
         },
         {
           value: 'disabled',
-          label: translate('auto.components.settings.AgentsPane.8dc0192e48', 'Disabled')
+          label: translate('auto.components.settings.AgentsPane.8dc0192e48', 'Hidden')
         }
       ]}
     />
@@ -113,7 +113,7 @@ export function AgentCatalogRow({
             <span className="text-sm font-medium leading-none">{label}</span>
             {!isEnabled && (
               <SettingsBadge tone="muted">
-                {translate('auto.components.settings.AgentsPane.8dc0192e48', 'Disabled')}
+                {translate('auto.components.settings.AgentsPane.8dc0192e48', 'Hidden')}
               </SettingsBadge>
             )}
           </div>

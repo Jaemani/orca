@@ -169,7 +169,7 @@ export function SourceControlAgentActionDialogForm({
                     )
                   : translate(
                       'auto.components.right.sidebar.SourceControlAgentActionDialogForm.1d47db9bf0',
-                      'No enabled agents'
+                      'No agents to show'
                     )}
               </span>
               {onOpenSettings ? (

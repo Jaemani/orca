@@ -174,7 +174,7 @@ export function useChecksPanelCommentResolution(model: ChecksPanelCommentResolut
   const aiActionDisabledReason = !activeWorktreeId
     ? 'Select a workspace before launching an AI action.'
     : noEnabledAgentKnown
-      ? 'No enabled AI agents. Configure agents in Settings.'
+      ? 'No AI agents are shown. Choose which agents to show in Settings.'
       : undefined
   useEffect(() => {
     if (!sourceControlAiActionsVisible) {

@@ -243,7 +243,7 @@ function QuickLaunchAgentMenuItemsInner({
               : detectedIds && detectedIds.length > 0
                 ? translate(
                     'auto.components.tab.bar.QuickLaunchButton.8dea9b5cdf',
-                    'No enabled agents'
+                    'No agents to show'
                   )
                 : translate(
                     'auto.components.tab.bar.QuickLaunchButton.e518f544b1',

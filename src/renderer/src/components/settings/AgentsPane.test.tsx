@@ -546,9 +546,9 @@ describe('AgentsPane', () => {
       disabledTuiAgents: ['claude']
     })
 
-    expect(markup).toContain('aria-label="Claude availability"')
-    expect(markup).toContain('Enabled')
-    expect(markup).toContain('Disabled')
+    expect(markup).toContain('aria-label="Claude visibility"')
+    expect(markup).toContain('Shown')
+    expect(markup).toContain('Hidden')
     expect(markup).not.toContain('Shown in launch and default choices.')
     expect(markup).not.toContain('Install to use in launch and default choices.')
     expect(markup).not.toContain('Hidden from launch and default choices.')
@@ -570,7 +570,7 @@ describe('AgentsPane', () => {
     }
 
     expect(props.value).toBe('enabled')
-    expect(props.ariaLabel).toBe('Claude availability')
+    expect(props.ariaLabel).toBe('Claude visibility')
 
     props.onChange('enabled')
     expect(onSetEnabled).not.toHaveBeenCalled()

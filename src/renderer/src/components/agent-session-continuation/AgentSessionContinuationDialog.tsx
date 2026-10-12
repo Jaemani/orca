@@ -221,7 +221,7 @@ export function AgentSessionContinuationDialog({
               <p className="text-[11px] text-muted-foreground">
                 {translate(
                   'components.agentSessionContinuation.noAgents',
-                  'No enabled Agents were detected on this workspace host.'
+                  'No Agents shown in Settings were detected on this workspace host.'
                 )}
               </p>
             ) : null}

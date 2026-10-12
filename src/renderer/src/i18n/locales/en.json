@@ -799,7 +799,7 @@
               "822bf52295": "Unable to resolve the workspace launch platform.",
               "dfb4dd7c00": "Unable to find the workspace attached to these checks.",
               "9f00d7df0c": "Fix checks prompt is empty. Update Source Control AI settings.",
-              "2ebf794906": "No enabled AI agent was detected on this workspace host.",
+              "2ebf794906": "No AI agent shown in Settings was detected on this workspace host.",
               "4c7f783a7a": "Saved checks agent is not available on this workspace host."
             }
           }
@@ -3654,7 +3654,7 @@
             "ec2adf093e": "Launch {{value0}} in a new terminal",
             "465e432ef1": "Could not build launch command for {{value0}}.",
             "e518f544b1": "No agents detected",
-            "8dea9b5cdf": "No enabled agents",
+            "8dea9b5cdf": "No agents to show",
             "needsServerUpdate": "Update Orca on this server to list this workspace’s agents",
             "hostUnreachable": "Can’t reach this workspace’s host to list its agents"
           },
@@ -6988,13 +6988,13 @@
           "f9f127d664": "Override the binary path or name, and edit the default launch arguments or environment for this agent.",
           "f95b5c79b8": "Install",
           "fe4d630c94": "Docs",
-          "8dc0192e48": "Disabled",
+          "8dc0192e48": "Hidden",
           "df123171d1": "Not installed",
           "c8794e622e": "Detected",
           "5200dac9da": "Reset",
           "2e45ca29b6": "Command",
-          "d4d2a45d63": "Enabled",
-          "1c9a9679ec": "{{value0}} availability",
+          "d4d2a45d63": "Shown",
+          "1c9a9679ec": "{{value0}} visibility",
           "0d9e293a02": "Refresh",
           "c9b33eb5c0": "Refreshing…",
           "13647f9f80": "Re-read your shell PATH and re-detect installed agents",
@@ -13258,7 +13258,7 @@
             "15c5d85706": "Agent",
             "3e8f21954f": "error",
             "74168d7ada": "idle",
-            "1d47db9bf0": "No enabled agents",
+            "1d47db9bf0": "No agents to show",
             "c7ff8cef11": "Detecting agents...",
             "b0da3a4d3e": "Launch recipe already saved",
             "bff4795a6d": "Change the agent, arguments, or prompt template to update the saved recipe.",
@@ -13657,7 +13657,7 @@
                       "empty": "Commit failure prompt is empty. Update Source Control AI settings."
                     },
                     "d481ab22f9": "Saved AI agent is unavailable. Use Customize launch to choose another agent.",
-                    "9bbd9077a2": "No enabled AI agents. Configure agents in Settings.",
+                    "9bbd9077a2": "No AI agents are shown. Choose which agents to show in Settings.",
                     "5540ff50cc": "Could not build the agent launch command.",
                     "216f762bd7": "Unable to resolve the workspace connection.",
                     "success": "Started an AI agent for the {{value0}} failure."
@@ -19001,7 +19001,7 @@
       "selectAgent": "Select an Agent",
       "detectingAgents": "Detecting Agents on this workspace host…",
       "detectionFailed": "Could not detect Agents on this workspace host.",
-      "noAgents": "No enabled Agents were detected on this workspace host.",
+      "noAgents": "No Agents shown in Settings were detected on this workspace host.",
       "context": "Context",
       "modeFocused": "Focused handoff (Recommended)",
       "modeFocusedDescription": "Uses the latest status and current workspace, reading older transcript details only when needed.",
