@@ -1,7 +1,8 @@
-import { spawn as spawnProcess, type SpawnOptions } from 'node:child_process'
+import { spawn, type SpawnOptions } from 'node:child_process'
 import { existsSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
-import { runProcessSync } from '@orca/process-host'
+import { runProcessSync, spawnProcess } from '@orca/process-host'
+import type { ProcessSpec } from '@orca/process-host/process-spec'
 import {
   SERVE_UPDATE_HANDOFF_PATH_ENV,
   getServeUpdateHandoffPath
@@ -106,7 +107,7 @@ export function getMacOpenArgs(appBundlePath: string, userDataPath: string): str
 }
 
 function spawnDetached(command: string, args: string[], options: SpawnOptions): void {
-  const child = spawnProcess(command, args, {
+  const child = spawn(command, args, {
     detached: true,
     stdio: 'ignore',
     ...options
@@ -217,7 +218,10 @@ function spawnElectronServe(
   if (handoffPath) {
     childEnv[SERVE_UPDATE_HANDOFF_PATH_ENV] = handoffPath
   }
-  const spawnOptions: SpawnOptions = {
+  // Why process-host: it encodes a Windows `.cmd`/`.bat` executable's arguments instead of a raw shell.
+  const spec: ProcessSpec = {
+    program: executable,
+    args: childArgs,
     detached: args.recipeJson === true,
     cwd: resolveAppRoot(),
     stdio:
@@ -226,17 +230,13 @@ function spawnElectronServe(
         : handoffPath
           ? ['inherit', 'inherit', 'inherit', 'ipc']
           : 'inherit',
-    ...getExecutableSpawnOptions(executable),
     env: childEnv
   }
   const interruptedHandoff = handoffPath ? readServeUpdateHandoffSync(handoffPath) : null
   if (interruptedHandoff?.phase === 'install-requested') {
     // Why: the node-mode CLI is not an NSRunningApplication, so it can retain launchd ownership while ShipIt swaps the app.
     return resumeInterruptedServeUpdate({
-      executable,
-      childArgs,
-      spawnOptions,
-      spawnChild: spawnProcess,
+      spec,
       handoffPath: handoffPath!,
       handoff: interruptedHandoff
     })
@@ -244,17 +244,14 @@ function spawnElectronServe(
   if (isSupervisedSpawnHeld()) {
     return Promise.resolve(0)
   }
-  const child = spawnProcess(executable, childArgs, spawnOptions)
+  const child = spawnProcess(spec)
   const spawnedAt = Date.now()
 
   if (args.recipeJson) {
     return waitForRecipeJson(child)
   }
   return superviseForegroundServe({
-    executable,
-    childArgs,
-    spawnOptions,
-    spawnChild: spawnProcess,
+    spec,
     child,
     handoffPath,
     expectedHandoff: null

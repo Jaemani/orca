@@ -35,10 +35,7 @@ function superviseUntilExit(code: number | null, signal: NodeJS.Signals | null):
 
 function superviseChild(child: FakeChildProcess): Promise<number> {
   return superviseForegroundServe({
-    executable: '/Applications/Orca.app/Contents/MacOS/Orca',
-    childArgs: ['--serve'],
-    spawnOptions: {},
-    spawnChild: vi.fn() as never,
+    spec: { program: '/Applications/Orca.app/Contents/MacOS/Orca', args: ['--serve'] },
     handoffPath: null,
     child: child as never,
     expectedHandoff: null
@@ -172,10 +169,7 @@ describe('superviseForegroundServe signal exits', () => {
     await rm(missingParent, { recursive: true })
     const child = new FakeChildProcess()
     const supervised = superviseForegroundServe({
-      executable: '/Applications/Orca.app/Contents/MacOS/Orca',
-      childArgs: ['--serve'],
-      spawnOptions: {},
-      spawnChild: vi.fn() as never,
+      spec: { program: '/Applications/Orca.app/Contents/MacOS/Orca', args: ['--serve'] },
       handoffPath: join(missingParent, 'handoff.json'),
       child: child as never,
       expectedHandoff: {
